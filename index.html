@@ -811,15 +811,10 @@
         function startCycling() {
             timers.forEach(function(t) { clearTimeout(t); clearInterval(t); });
             timers = [];
-            cells.forEach(function(c, i) {
-                var offset = Math.round(i * HOLD / cells.length);
-                var t = setTimeout(function() {
-                    advance(c);
-                    var iv = setInterval(function() { advance(c); }, HOLD);
-                    timers.push(iv);
-                }, offset);
-                timers.push(t);
-            });
+            var iv = setInterval(function() {
+                cells.forEach(function(c) { advance(c); });
+            }, HOLD);
+            timers.push(iv);
         }
 
         var dotStep = 0;
