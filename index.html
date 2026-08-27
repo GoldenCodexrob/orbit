@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Codex - ORBIT WRO 2026</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-18px); }
+        }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.15; }
+            50% { opacity: 0.28; }
+        }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.92); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        .content-blur  { animation: pulse-glow 6s ease-in-out infinite; }
+        .card-glow:hover { box-shadow: 0 0 30px rgba(59,130,246,.08); }
+        .orbit-float      { animation: float 7s ease-in-out infinite; }
+        .orbit-float-slow { animation: float 10s ease-in-out infinite; animation-delay: -3s; }
+
+        .gallery-scroll::-webkit-scrollbar { height: 4px; }
+        .gallery-scroll::-webkit-scrollbar-track { background: #0f172a; }
+        .gallery-scroll::-webkit-scrollbar-thumb { background: #1d4ed8; border-radius: 2px; }
+
+        .thumb-45 {
+            aspect-ratio: 4 / 5;
+            width: 140px;
+            flex-shrink: 0;
+            object-fit: cover;
+            cursor: pointer;
+            border-radius: 0.75rem;
+            border: 1px solid #1e293b;
+            box-shadow: 0 4px 16px rgba(0,0,0,.4);
+            transition: transform .2s, box-shadow .2s, border-color .2s;
+        }
+        .thumb-45:hover {
+            transform: scale(1.04);
+            box-shadow: 0 8px 28px rgba(59,130,246,.25);
+            border-color: #3b82f6;
+        }
+
+        .stage-hero {
+            aspect-ratio: 4 / 5;
+            width: 100%;
+            object-fit: cover;
+            border-radius: 1rem;
+            border: 1px solid #1e293b;
+            box-shadow: 0 8px 40px rgba(0,0,0,.5);
+        }
+
+        /* Lightbox */
+        #lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0,0,0,.92);
+            backdrop-filter: blur(8px);
+            animation: fadeIn .18s ease;
+            align-items: center;
+            justify-content: center;
+        }
+        #lightbox.active { display: flex; }
+        #lightbox-img {
+            max-width: 92vw;
+            max-height: 92vh;
+            object-fit: contain;
+            border-radius: 0.75rem;
+            box-shadow: 0 0 80px rgba(59,130,246,.25);
+            animation: fadeInScale .22s ease;
+        }
+        #lightbox-prev, #lightbox-next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.15);
+            color: white;
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: background .15s;
+            backdrop-filter: blur(4px);
+        }
+        #lightbox-prev:hover, #lightbox-next:hover { background: rgba(59,130,246,.35); }
+        #lightbox-prev { left: 16px; }
+        #lightbox-next { right: 16px; }
+        #lightbox-close {
+            position: absolute;
+            top: 16px; right: 16px;
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.15);
+            color: white;
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: background .15s;
+        }
+        #lightbox-close:hover { background: rgba(239,68,68,.4); }
+        #lightbox-counter {
+            position: absolute;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,.55);
+            font-size: 0.8rem;
+            font-family: monospace;
+            letter-spacing: .08em;
+        }
+        @keyframes gradientPulse {
+            0%   { opacity: 1; }
+            50%  { opacity: 0.75; }
+            100% { opacity: 1; }
+        }
+        /* Hero mosaic */
+        #hero-mosaic { background: #020617; }
+        .mosaic-cell {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            transition: opacity 0.9s ease;
+        }
+        .mosaic-cell img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            transition: opacity 0.8s ease, transform 6s ease;
+            transform: scale(1.0);
+        }
+        .mosaic-cell img.entering { opacity: 0; transform: scale(1.04); }
+        .mosaic-cell img.visible  { opacity: 1; transform: scale(1.0); }
+        .mosaic-cell img.leaving  { opacity: 0; transform: scale(0.97); }
+        .hero-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.3);
+            border: none;
+            cursor: pointer;
+            transition: background .3s, transform .3s;
+        }
+        .hero-dot.active {
+            background: #22d3ee;
+            transform: scale(1.3);
+        }
+
+        #lightbox-caption {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,.75);
+            font-size: 0.82rem;
+            max-width: 70vw;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-blue-400 selection:text-slate-950">
+
+    <!-- LIGHTBOX -->
+    <div id="lightbox" role="dialog" aria-modal="true">
+        <button id="lightbox-close" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+        <button id="lightbox-prev"  aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+        <img id="lightbox-img" src="" alt="">
+        <button id="lightbox-next"  aria-label="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+        <div id="lightbox-caption"></div>
+        <div id="lightbox-counter"></div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <img src="assets/teamlogo.webp" class="w-9 h-9 rounded-xl object-cover shadow-lg shadow-blue-600/20" alt="Golden Codex Logo">
+                    <span class="font-extrabold text-xl tracking-wider text-white">GOLDEN CODEX</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#home"    class="text-slate-300 hover:text-cyan-400 font-medium transition-colors">Home</a>
+                    <a href="#team"    class="text-slate-300 hover:text-blue-400 font-medium transition-colors">Team</a>
+                    <a href="#goals"   class="text-slate-300 hover:text-blue-300 font-medium transition-colors">Goals</a>
+                    <a href="#history" class="text-slate-300 hover:text-cyan-400 font-medium transition-colors">Design History</a>
+                    <a href="#project" class="text-slate-300 hover:text-cyan-400 font-medium transition-colors">The Project</a>
+                    <button onclick="openSourceCode()" style="font-size:1rem; font-weight:500; color:#cbd5e1; background:none; border:none; padding:0; cursor:pointer; transition:color .15s;" onmouseover="this.style.color='#22d3ee'" onmouseout="this.style.color='#cbd5e1'">Source Code</button>
+                </div>
+                <!-- Hamburger button (mobile only) -->
+                <button id="nav-toggle" class="md:hidden flex flex-col justify-center items-center w-10 h-10 gap-1.5 rounded-lg hover:bg-slate-800 transition-colors" onclick="toggleMobileNav()" aria-label="Menu">
+                    <span class="ham-bar block w-6 h-0.5 bg-slate-300 transition-all duration-300"></span>
+                    <span class="ham-bar block w-6 h-0.5 bg-slate-300 transition-all duration-300"></span>
+                    <span class="ham-bar block w-6 h-0.5 bg-slate-300 transition-all duration-300"></span>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile dropdown -->
+        <div id="mobile-nav" class="md:hidden hidden border-t border-slate-800 bg-slate-950/95 backdrop-blur-md">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col gap-1">
+                <a href="#home"    onclick="closeMobileNav()" class="block px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl font-medium transition-all">Home</a>
+                <a href="#team"    onclick="closeMobileNav()" class="block px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl font-medium transition-all">Team</a>
+                <a href="#goals"   onclick="closeMobileNav()" class="block px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl font-medium transition-all">Goals</a>
+                <a href="#history" onclick="closeMobileNav()" class="block px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl font-medium transition-all">Design History</a>
+                <a href="#project" onclick="closeMobileNav()" class="block px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl font-medium transition-all">The Project</a>
+                <button onclick="closeMobileNav(); openSourceCode()" class="text-left px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl font-medium transition-all w-full">Source Code</button>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+    function toggleMobileNav() {
+        const nav = document.getElementById('mobile-nav');
+        const bars = document.querySelectorAll('.ham-bar');
+        const isHidden = nav.classList.toggle('hidden');
+        if (!isHidden) {
+            bars[0].style.transform = 'translateY(8px) rotate(45deg)';
+            bars[1].style.opacity = '0';
+            bars[2].style.transform = 'translateY(-8px) rotate(-45deg)';
+        } else {
+            bars[0].style.transform = '';
+            bars[1].style.opacity = '';
+            bars[2].style.transform = '';
+        }
+    }
+    function closeMobileNav() {
+        const nav = document.getElementById('mobile-nav');
+        const bars = document.querySelectorAll('.ham-bar');
+        nav.classList.add('hidden');
+        bars[0].style.transform = '';
+        bars[1].style.opacity = '';
+        bars[2].style.transform = '';
+    }
+    </script>
+
+    <!-- HERO — Full-width cinematic image collage / slideshow -->
+    <header id="home" class="relative overflow-hidden border-b border-slate-800" style="height:69vh; min-height:420px;">
+
+        <!-- Hero background: mosaic when FRONT/ has images, else animated gradient -->
+        <div id="hero-mosaic" class="absolute inset-0 flex items-stretch gap-1 overflow-hidden" style="background:#020617;">
+        </div>
+        <!-- Animated gradient background (shows when no images in FRONT/) -->
+        <div id="hero-gradient" class="absolute inset-0" style="
+            background: radial-gradient(ellipse 80% 60% at 20% 50%, rgba(29,78,216,0.25) 0%, transparent 60%),
+                        radial-gradient(ellipse 60% 50% at 80% 40%, rgba(6,182,212,0.15) 0%, transparent 60%),
+                        radial-gradient(ellipse 50% 40% at 50% 80%, rgba(99,102,241,0.12) 0%, transparent 60%),
+                        #020617;
+            animation: gradientPulse 8s ease-in-out infinite alternate;
+        "></div>
+
+        <!-- Dark gradient overlays: bottom heavy so text reads well -->
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/55 to-slate-950/20 pointer-events-none z-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-slate-950/60 via-transparent to-slate-950/30 pointer-events-none z-10"></div>
+
+        <!-- Content -->
+        <div class="relative z-20 h-full flex flex-col justify-end pb-16 px-6 sm:px-12 lg:px-20 max-w-7xl mx-auto">
+            <!-- Text block -->
+            <div class="max-w-2xl">
+                <span class="inline-block text-xs uppercase tracking-widest text-cyan-400 font-bold bg-slate-950/70 backdrop-blur px-4 py-1.5 rounded-full border border-cyan-400/30 mb-5">WRO Future Innovators Senior 2026</span>
+                <h1 class="text-6xl sm:text-8xl font-black tracking-tight text-white leading-none mb-3" style="text-shadow:0 4px 40px rgba(0,0,0,.8);">ORBIT</h1>
+                <p class="text-slate-300 text-sm tracking-widest uppercase mb-5" style="text-shadow:0 2px 12px rgba(0,0,0,.9);">Or&aacute;culo de Ra&iacute;ces Basado en Identificaci&oacute;n por Trilateraci&oacute;n</p>
+                <p class="text-base sm:text-lg text-slate-200 max-w-xl mb-8 leading-relaxed" style="text-shadow:0 2px 16px rgba(0,0,0,.8);">
+                    &ldquo;<span class="text-cyan-400 font-semibold">Tu embajador cultural</span>, <span class="text-blue-400 font-semibold">tu gu&iacute;a a las ra&iacute;ces</span>&rdquo; &mdash; un robot social con IA que acerca la cultura venezolana a cada visitante.
+                </p>
+                <div class="flex flex-wrap gap-3">
+                    <a href="#project" class="inline-flex items-center justify-center px-7 h-12 font-bold tracking-wide text-slate-950 bg-cyan-400 rounded-xl hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-400/25 text-sm">
+                        <i class="fa-solid fa-robot mr-2"></i> Explorar la Soluci&oacute;n
+                    </a>
+                    <a href="#team" class="inline-flex items-center justify-center px-7 h-12 font-bold tracking-wide text-slate-100 bg-white/10 backdrop-blur rounded-xl hover:bg-white/20 transition-all border border-white/20 text-sm">
+                        Conocer al Equipo
+                    </a>
+                </div>
+            </div>
+
+            <!-- Slide indicators + progress -->
+            <div class="absolute right-6 bottom-10 flex flex-col items-center gap-2 z-30">
+                <div id="hero-dots" class="flex gap-2">
+                    <button class="hero-dot active" data-idx="0"></button>
+                    <button class="hero-dot" data-idx="1"></button>
+                    <button class="hero-dot" data-idx="2"></button>
+                    <button class="hero-dot" data-idx="3"></button>
+                    <button class="hero-dot" data-idx="4"></button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- TEAM -->
+    <section id="team" class="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-slate-800">
+        <div class="text-center max-w-3xl mx-auto mb-12">
+            <span class="text-blue-400 font-bold uppercase tracking-widest text-sm block mb-2">Estudiantes Senior</span>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Conoce al Equipo</h2>
+            <p class="text-slate-400 mt-2">Golden Codex &middot; Lecher&iacute;a, Estado Anzo&aacute;tegui, Venezuela</p>
+        </div>
+
+        <!-- Member cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+            <div class="bg-slate-900/60 border border-slate-800 p-8 rounded-2xl relative overflow-hidden hover:border-blue-500/40 transition-all shadow-md flex flex-col">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-blue-600"></div>
+                <div class="flex justify-center mb-5">
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-blue-800 to-blue-500 flex items-center justify-center text-3xl font-black text-white shadow-lg">D</div>
+                </div>
+                <h3 class="text-xl font-bold text-white text-center">Daniel Guzm&aacute;n</h3>
+                <p class="text-xs text-blue-400 font-semibold tracking-wider uppercase text-center mb-4">Modelado Digital &middot; 17 a&ntilde;os</p>
+                <p class="text-slate-400 text-sm leading-relaxed text-justify flex-grow">Encargado del modelado digital en <strong class="text-slate-300">Rhino 8</strong>, registrando toda la geometr&iacute;a de fabricaci&oacute;n. Supervisa la estructura y la integraci&oacute;n f&iacute;sica y digital de los componentes del sistema.</p>
+            </div>
+            <div class="bg-slate-900/60 border border-slate-800 p-8 rounded-2xl relative overflow-hidden hover:border-cyan-500/40 transition-all shadow-md flex flex-col">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-cyan-500"></div>
+                <div class="flex justify-center mb-5">
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-cyan-800 to-cyan-500 flex items-center justify-center text-3xl font-black text-white shadow-lg">B</div>
+                </div>
+                <h3 class="text-xl font-bold text-white text-center">Bruno Prandini</h3>
+                <p class="text-xs text-cyan-400 font-semibold tracking-wider uppercase text-center mb-4">Movimiento &middot; 17 a&ntilde;os</p>
+                <p class="text-slate-400 text-sm leading-relaxed text-justify flex-grow">Dise&ntilde;a y ensambla los mecanismos de locomoci&oacute;n, integr&aacute;ndolos con la estructura impresa en 3D. Supervisa la detecci&oacute;n de personas mediante el <strong class="text-slate-300">sensor ultras&oacute;nico</strong> y la plataforma m&oacute;vil de 4 motores.</p>
+            </div>
+            <div class="bg-slate-900/60 border border-slate-800 p-8 rounded-2xl relative overflow-hidden hover:border-indigo-500/40 transition-all shadow-md flex flex-col">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-indigo-500"></div>
+                <div class="flex justify-center mb-5">
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-800 to-indigo-500 flex items-center justify-center text-3xl font-black text-white shadow-lg">M</div>
+                </div>
+                <h3 class="text-xl font-bold text-white text-center">Maximiliano Rodr&iacute;guez</h3>
+                <p class="text-xs text-indigo-400 font-semibold tracking-wider uppercase text-center mb-4">Interfaz e IA &middot; 15 a&ntilde;os</p>
+                <p class="text-slate-400 text-sm leading-relaxed text-justify flex-grow">Programa el sistema de <strong class="text-slate-300">trilateraci&oacute;n ac&uacute;stica</strong> mediante 3 micr&oacute;fonos por intensidad. Supervisa las animaciones faciales de ORBIT, la IA conversacional y la detecci&oacute;n facial.</p>
+            </div>
+        </div>
+
+        <!-- Quiénes somos — full width, no side image -->
+        <div class="bg-slate-900/40 border border-slate-800 rounded-2xl p-8 relative overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-700 via-blue-400 to-cyan-400"></div>
+            <div class="text-center mb-4">
+                <h3 class="text-xl font-bold text-white">&iquest;Qui&eacute;nes somos?</h3>
+                <p class="text-xs text-blue-400 font-semibold tracking-wider uppercase mt-0.5">Sobre el Equipo</p>
+            </div>
+            <p class="text-slate-300 text-sm leading-relaxed text-justify max-w-4xl mx-auto">Somos un equipo de estudiantes de Lecher&iacute;a, Estado Anzo&aacute;tegui, unidos por el impulso de usar la tecnolog&iacute;a para resolver problemas reales con impacto positivo en la sociedad. Nuestras fortalezas abarcan rob&oacute;tica, programaci&oacute;n, dise&ntilde;o digital y fabricaci&oacute;n digital. Creemos que la innovaci&oacute;n tecnol&oacute;gica puede ser una herramienta poderosa para fortalecer la identidad cultural: que los robots pueden hacer m&aacute;s que automatizar tareas &mdash; pueden conectar personas, transmitir conocimiento y despertar curiosidad por las historias que nos definen.</p>
+        </div>
+    </section>
+
+    <!-- EXECUTIVE SUMMARY -->
+    <section class="py-20 bg-slate-900/20 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 relative overflow-hidden shadow-2xl">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-cyan-400 via-blue-600 to-indigo-700 opacity-15 blur-3xl pointer-events-none"></div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-10 items-center">
+                    <div class="md:col-span-2">
+                        <span class="text-cyan-400 font-bold uppercase tracking-widest text-sm block mb-2">Resumen Ejecutivo</span>
+                        <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-6">El Proyecto en Resumen</h2>
+                        <div class="space-y-4 text-slate-300 text-base leading-relaxed">
+                            <p><strong>ORBIT</strong> es un robot social antropom&oacute;rfico dise&ntilde;ado para promover la cultura venezolana a trav&eacute;s de experiencias conversacionales accesibles e intuitivas. Su nombre es un acr&oacute;nimo: <em>Or&aacute;culo de Ra&iacute;ces Basado en Identificaci&oacute;n por Trilateraci&oacute;n</em>.</p>
+                            <p>El concepto surgi&oacute; de semanas de lluvias de ideas intensas &mdash; explorando desde cubos con proyecciones hologr&aacute;ficas hasta la mec&aacute;nica de una esfera rodante estilo BB-8. Lo que uni&oacute; todas esas ideas fue una sola pregunta: <strong>&iquest;c&oacute;mo puede un robot conectar genuinamente con las personas y despertar su curiosidad por la cultura venezolana?</strong></p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+                                <div class="p-5 bg-slate-900/90 border border-slate-800 border-l-4 border-l-blue-500 rounded-xl shadow-lg">
+                                    <h4 class="font-extrabold text-white text-base mb-2 flex items-center gap-2"><i class="fa-solid fa-ear-listen text-blue-400"></i> Percepci&oacute;n Ac&uacute;stica</h4>
+                                    <p class="text-xs text-slate-400 leading-relaxed">Tres micr&oacute;fonos dentro de canales ac&uacute;sticos capturan y comparan intensidades de sonido para estimar con precisi&oacute;n la direcci&oacute;n del hablante.</p>
+                                </div>
+                                <div class="p-5 bg-slate-900/90 border border-slate-800 border-l-4 border-l-cyan-500 rounded-xl shadow-lg">
+                                    <h4 class="font-extrabold text-white text-base mb-2 flex items-center gap-2"><i class="fa-solid fa-comments text-cyan-400"></i> IA Conversacional</h4>
+                                    <p class="text-xs text-slate-400 leading-relaxed">Independientemente del tema inicial, la IA redirige activamente el di&aacute;logo hacia la cultura venezolana: historia, m&uacute;sica, gastronom&iacute;a y monumentos.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-center items-center md:col-span-1">
+                        <img src="assets/team.jpg"
+                             class="orbit-float-slow w-full max-w-xs rounded-2xl shadow-2xl shadow-blue-700/30 border border-blue-600/30"
+                             style="aspect-ratio:4/5; object-fit:cover; object-position:center 15%;"
+                             alt="Equipo Golden Codex">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- GOALS -->
+    <section id="goals" class="py-24 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-blue-400 font-bold uppercase tracking-widest text-sm block mb-2">Objetivos e Impacto</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Objetivos de ORBIT</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-slate-950 border border-slate-800 p-8 rounded-xl relative overflow-hidden hover:border-slate-700 transition-all card-glow">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-blue-700"></div>
+                    <div class="w-12 h-12 rounded-lg bg-blue-700/15 flex items-center justify-center text-blue-400 mb-6 font-bold text-lg">01</div>
+                    <h3 class="text-xl font-bold text-white mb-3">Divulgaci&oacute;n Cultural</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">ORBIT acerca la historia, m&uacute;sica, gastronom&iacute;a y tradiciones venezolanas a los visitantes mediante conversaciones naturales en tiempo real.</p>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 p-8 rounded-xl relative overflow-hidden hover:border-slate-700 transition-all card-glow">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-cyan-500"></div>
+                    <div class="w-12 h-12 rounded-lg bg-cyan-500/15 flex items-center justify-center text-cyan-400 mb-6 font-bold text-lg">02</div>
+                    <h3 class="text-xl font-bold text-white mb-3">Orientaci&oacute;n Ac&uacute;stica</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Mediante trilateraci&oacute;n ac&uacute;stica con 3 micr&oacute;fonos, ORBIT estima la direcci&oacute;n de quien habla, gira hacia esa persona y se acerca aut&oacute;nomamente.</p>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 p-8 rounded-xl relative overflow-hidden hover:border-slate-700 transition-all card-glow">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
+                    <div class="w-12 h-12 rounded-lg bg-indigo-500/15 flex items-center justify-center text-indigo-400 mb-6 font-bold text-lg">03</div>
+                    <h3 class="text-xl font-bold text-white mb-3">Interacci&oacute;n Social</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Un dise&ntilde;o antropom&oacute;rfico con canales ac&uacute;sticos y pantalla facial expresiva que genera confianza y curiosidad en ni&ntilde;os y adultos.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DESIGN HISTORY -->
+    <section id="history" class="py-24 border-b border-slate-800 bg-slate-950/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-20">
+                <span class="text-cyan-400 font-bold uppercase tracking-widest text-sm block mb-2">El Camino</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Evoluci&oacute;n del Dise&ntilde;o</h2>
+                <p class="text-slate-400 mt-3 leading-relaxed">ORBIT no se construy&oacute; en l&iacute;nea recta. Naci&oacute; de semanas de ideas intensas, callejones sin salida y choques creativos &mdash; desde una caja con hologramas hasta el robot social que es hoy.</p>
+            </div>
+
+            <!-- Etapa 01: La Caja y el Holograma -->
+            <div class="relative mb-20">
+                <div class="flex flex-col md:flex-row items-start gap-10">
+                    <div class="w-full md:w-1/2 order-2 md:order-1 flex flex-col">
+                        <div class="inline-flex items-center gap-2 bg-blue-900/30 border border-blue-700/40 px-3 py-1 rounded-full mb-4 self-start">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                            <span class="text-blue-400 text-xs font-bold uppercase tracking-widest">Etapa 01</span>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-white mb-3">La Caja y el Holograma</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">La primera lluvia de ideas dio como resultado un concepto futurista: un robot c&uacute;bico que proyectar&iacute;a contenido cultural hologr&aacute;fico en el aire. Inspirado en interfaces de ciencia ficci&oacute;n, el equipo explor&oacute; c&oacute;mo atraer visitantes sin interacci&oacute;n f&iacute;sica. La idea era visualmente rica, pero plante&oacute; preguntas inmediatas: &iquest;c&oacute;mo <em>interactuar&iacute;an</em> los visitantes? &iquest;C&oacute;mo sabr&iacute;a que alguien estaba cerca?</p>
+                        <p class="text-slate-500 text-xs italic mb-6">Esta etapa plant&oacute; la semilla: el robot necesitaba poder detectar y acercarse a las personas.</p>
+                        <p class="text-xs text-slate-500 uppercase tracking-widest mb-3 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-images text-blue-400/60 text-xs"></i> Bocetos &mdash; clic para ampliar</p>
+                        <div class="flex gap-3 overflow-x-auto pb-3 gallery-scroll">
+                            <img class="thumb-45" src="assets/holo/holo.jpg"   data-gal="g1" data-caption="La Caja &mdash; vistas frontal, inferior y superior con dimensiones" alt="La Caja vistas">
+                            <img class="thumb-45" src="assets/holo/holol.jpg"  data-gal="g1" data-caption="La Caja &mdash; boceto con holograma, dimensiones y notas" alt="La Caja boceto con holograma">
+                        </div>
+                    </div>
+                    <div class="w-full md:w-1/2 order-1 md:order-2">
+                        <img class="stage-hero" src="assets/holo/holofront.jpg" style="object-position:center top;" alt="La Caja - vistas de dise&ntilde;o t&eacute;cnico">
+                    </div>
+                </div>
+                <div class="flex justify-center mt-12"><div class="flex flex-col items-center gap-1"><div class="w-px h-8 bg-gradient-to-b from-blue-700 to-blue-400"></div><i class="fa-solid fa-chevron-down text-blue-400 text-xs"></i></div></div>
+            </div>
+
+            <!-- Etapa 02: Oye Caja — updated to oyecajafront.png (Rhino CAD cutaway) -->
+            <div class="relative mb-20">
+                <div class="flex flex-col md:flex-row items-start gap-10">
+                    <div class="w-full md:w-1/2">
+                        <!-- oyecajafront.png: Rhino CAD cutaway render, transparent walls, tracks below -->
+                        <img class="stage-hero" src="assets/Oyecaja/oyecajafront.png"
+                             style="object-fit:contain; background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%); object-position:center;"
+                             alt="Oye Caja - dise&ntilde;o CAD interior con chasis y pistas">
+                    </div>
+                    <div class="w-full md:w-1/2 flex flex-col">
+                        <div class="inline-flex items-center gap-2 bg-cyan-900/30 border border-cyan-700/40 px-3 py-1 rounded-full mb-4 self-start">
+                            <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                            <span class="text-cyan-400 text-xs font-bold uppercase tracking-widest">Etapa 02</span>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-white mb-3">Oye Caja</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">El equipo fusi&oacute;n&oacute; la forma c&uacute;bica con anillos orbitales estilo Saturno &mdash; un gui&ntilde;o al nombre definitivo &ldquo;ORBIT&rdquo;. Este concepto introdujo la idea de un <strong class="text-slate-300">cuerpo giratorio</strong> capaz de orientarse f&iacute;sicamente. Los anillos se exploraron como mecanismo de rotaci&oacute;n y como indicador visual de movimiento. La complejidad mec&aacute;nica result&oacute; intimidante, pero dej&oacute; una huella permanente en el dise&ntilde;o final.</p>
+                        <p class="text-slate-500 text-xs italic mb-6">Lecci&oacute;n clave: la forma deb&iacute;a sentirse amigable. La geometr&iacute;a angular se percib&iacute;a intimidante.</p>
+                        <p class="text-xs text-slate-500 uppercase tracking-widest mb-3 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-images text-cyan-400/60 text-xs"></i> Dise&ntilde;o y prototipo &mdash; clic para ampliar</p>
+                        <div class="flex gap-3 overflow-x-auto pb-3 gallery-scroll">
+                            <img class="thumb-45" src="assets/Oyecaja/oyecajaextra2.jpg"    data-gal="g2" data-caption="Oye Caja &mdash; render CAD con anillo Saturno" alt="Render CAD Oye Caja">
+                            <img class="thumb-45" src="assets/Oyecaja/oyecajarhino.jpg"    data-gal="g2" data-caption="Oye Caja &mdash; modelado en Rhino 8" alt="CAD Rhino estructura c&uacute;bica">
+                            <img class="thumb-45" src="assets/Oyecaja/oyecajarhinofull.jpg" data-gal="g2" data-caption="Oye Caja &mdash; secci&oacute;n transversal interior" alt="CAD Rhino interior completo">
+                            <img class="thumb-45" src="assets/Oyecaja/oyecaja3d.jpg"       data-gal="g2" data-caption="Oye Caja &mdash; prototipo 3D impreso peque&ntilde;o" alt="Prototipo 3D peque&ntilde;o">
+                            <img class="thumb-45" src="assets/Oyecaja/oyecajawallsketch.jpg" data-gal="g2" data-caption="Oye Caja &mdash; vista CAD con boceto verde en pizarra" alt="CAD en pizarra con boceto verde">
+                            <img class="thumb-45" src="assets/Oyecaja/oyecajaextra2.jpg"   data-gal="g2" data-caption="Oye Caja &mdash; chasis en teatro, luces escenario" alt="Chasis Oye Caja en teatro">
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-center mt-12"><div class="flex flex-col items-center gap-1"><div class="w-px h-8 bg-gradient-to-b from-cyan-500 to-blue-400"></div><i class="fa-solid fa-chevron-down text-cyan-400 text-xs"></i></div></div>
+            </div>
+
+            <!-- Etapa 03: BB-8 — object-position centered on Arduino label (center-right of sketch) -->
+            <div class="relative mb-20">
+                <div class="flex flex-col md:flex-row items-start gap-10">
+                    <div class="w-full md:w-1/2 order-2 md:order-1 flex flex-col">
+                        <div class="inline-flex items-center gap-2 bg-indigo-900/30 border border-indigo-700/40 px-3 py-1 rounded-full mb-4 self-start">
+                            <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+                            <span class="text-indigo-400 text-xs font-bold uppercase tracking-widest">Etapa 03</span>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-white mb-3">La Fase BB-8</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">El equipo busc&oacute; inspiraci&oacute;n en el cine y encontr&oacute; a BB-8 de Star Wars: un robot esf&eacute;rico instant&aacute;neamente adorable. Esta etapa explor&oacute; un <strong class="text-slate-300">cuerpo esf&eacute;rico rodante</strong> con una cabeza separada encima. La silueta redondeada se sent&iacute;a m&aacute;s din&aacute;mica y amigable. Sin embargo, mantener una cabeza estable sobre una esfera libre &mdash; especialmente con micr&oacute;fonos y electr&oacute;nica &mdash; result&oacute; impr&aacute;ctico.</p>
+                        <p class="text-slate-500 text-xs italic mb-6">El atractivo de la esfera sobrevivi&oacute;: la redondez se convirti&oacute; en un principio de dise&ntilde;o fundamental.</p>
+                        <p class="text-xs text-slate-500 uppercase tracking-widest mb-3 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-images text-indigo-400/60 text-xs"></i> Bocetos BB-8 &mdash; clic para ampliar</p>
+                        <div class="flex gap-3 overflow-x-auto pb-3 gallery-scroll">
+                            <img class="thumb-45" src="assets/BB8/bb8topone.jpg"      data-gal="g3" data-caption="BB-8 &mdash; boceto a l&aacute;piz, vistas frontal y superior" alt="Boceto BB-8 l&aacute;piz">
+                            <img class="thumb-45" src="assets/BB8/bb8sketchfront.jpg" data-gal="g3" data-caption="BB-8 &mdash; Boolean Dif, pizarra con Arduino y secci&oacute;n transversal" alt="BB-8 Boolean Dif boceto pizarra">
+                        </div>
+                    </div>
+                    <div class="w-full md:w-1/2 order-1 md:order-2">
+                        <!-- Push image up (object-position 60% 20%) + center on Arduino text area (center-right, upper portion) -->
+                        <img class="stage-hero" src="assets/BB8/bb8sketchfront.jpg"
+                             style="object-position:62% 35%;"
+                             alt="BB-8 Boolean Dif &mdash; Arduino en pizarra">
+                    </div>
+                </div>
+                <div class="flex justify-center mt-12"><div class="flex flex-col items-center gap-1"><div class="w-px h-8 bg-gradient-to-b from-indigo-500 to-blue-400"></div><i class="fa-solid fa-chevron-down text-indigo-400 text-xs"></i></div></div>
+            </div>
+
+            <!-- Etapa 04: Nace ORBIT — orbitfront.jpg as hero -->
+            <div class="relative mb-20">
+                <div class="flex flex-col md:flex-row items-start gap-10">
+                    <div class="w-full md:w-1/2">
+                        <!-- orbitfront.jpg: the hand-drawn ORBIT face sketch (two eyes, disc shape) -->
+                        <img class="stage-hero" src="assets/Orbit/orbitfront.jpg"
+                             style="object-fit:contain; background:linear-gradient(135deg,#f8f8f8 0%,#e8e8e8 100%); object-position:center;"
+                             alt="ORBIT &mdash; boceto inicial de la cara y forma definitiva">
+                    </div>
+                    <div class="w-full md:w-1/2 flex flex-col">
+                        <div class="inline-flex items-center gap-2 bg-blue-900/30 border border-blue-700/40 px-3 py-1 rounded-full mb-4 self-start">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                            <span class="text-blue-400 text-xs font-bold uppercase tracking-widest">Etapa 04</span>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-white mb-3">Nace ORBIT</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">Con las lecciones de las tres etapas anteriores, el equipo dio el salto definitivo: un cuerpo <strong class="text-slate-300">disc&oacute;ide</strong> de 30 cm que combina la forma c&uacute;rvilinea de la fase esf&eacute;rica con una base estable y f&aacute;cil de imprimir. La pantalla facial expresiva, los canales ac&uacute;sticos en forma de o&iacute;do y la plataforma de 4 ruedas se integraron en un solo concepto coherente. ORBIT ten&iacute;a nombre, forma y prop&oacute;sito.</p>
+                        <p class="text-slate-500 text-xs italic mb-6">El nombre ORBIT &mdash; Or&aacute;culo de Ra&iacute;ces Basado en Identificaci&oacute;n por Trilateraci&oacute;n &mdash; surgi&oacute; en esta etapa.</p>
+                        <p class="text-xs text-slate-500 uppercase tracking-widest mb-3 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-images text-blue-400/60 text-xs"></i> Concepto ORBIT &mdash; clic para ampliar</p>
+                        <div class="flex gap-3 overflow-x-auto pb-3 gallery-scroll">
+                            <img class="thumb-45" src="assets/Orbit/orbitfront.jpg"        data-gal="g4" data-caption="ORBIT &mdash; boceto de la cara y forma discoidee" alt="ORBIT boceto cara">
+                            <img class="thumb-45" src="assets/Orbit/orbit.png"             data-gal="g4" data-caption="ORBIT &mdash; render oficial con interior y pantalla facial" alt="ORBIT render oficial">
+                            <img class="thumb-45" src="assets/Orbit/orbitfirsttry.jpg"    data-gal="g4" data-caption="ORBIT primer boceto &mdash; componentes y f&oacute;rmulas de trilateraci&oacute;n" alt="Primer boceto ORBIT">
+                            <img class="thumb-45" src="assets/Orbit/orbitsketch.jpg"      data-gal="g4" data-caption="ORBIT &mdash; boceto a l&aacute;piz, forma disc&oacute;ide temprana" alt="ORBIT boceto l&aacute;piz">
+                            <img class="thumb-45" src="assets/Orbit/orbitsketch.jpg" data-gal="g4" data-caption="ORBIT &mdash; transici&oacute;n de esfera a disco plano" alt="ORBIT transici&oacute;n">
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-center mt-12"><div class="flex flex-col items-center gap-1"><div class="w-px h-8 bg-gradient-to-b from-blue-500 to-cyan-400"></div><i class="fa-solid fa-chevron-down text-blue-400 text-xs"></i></div></div>
+            </div>
+
+            <!-- DISEÑO FINAL V3 — right after Nace ORBIT, before Del Boceto al CAD -->
+            <div class="relative mb-20">
+                <div class="bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border border-cyan-800/40 rounded-3xl p-8 sm:p-12 relative overflow-hidden shadow-2xl">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-cyan-400 via-blue-600 to-indigo-700 opacity-10 blur-3xl pointer-events-none"></div>
+                    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-700 via-cyan-400 to-blue-700"></div>
+                    <div class="flex flex-col md:flex-row items-center gap-10">
+                        <div class="w-full md:w-1/2 order-2 md:order-1">
+                            <div class="inline-flex items-center gap-2 bg-cyan-900/40 border border-cyan-600/50 px-3 py-1 rounded-full mb-4">
+                                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                                <span class="text-cyan-400 text-xs font-bold uppercase tracking-widest">Dise&ntilde;o Final &middot; V3</span>
+                            </div>
+                            <h3 class="text-2xl font-extrabold text-white mb-3">Orbit</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed mb-4">Cada etapa del camino dej&oacute; su huella. El cuerpo circular de 30 cm &mdash; determinado por los requisitos de ingenier&iacute;a ac&uacute;stica &mdash; evoc&oacute; la fase esf&eacute;rica. Los o&iacute;dos ac&uacute;sticos son una evoluci&oacute;n directa de los experimentos de detecci&oacute;n sonora. ORBIT es el producto de cada calej&oacute;n sin salida, de cada boceto y de cada debate del equipo Golden Codex.</p>
+                            <div class="flex flex-wrap gap-2 mt-4 mb-8">
+                                <span class="bg-slate-800 text-blue-400 text-xs px-3 py-1 rounded-full border border-slate-700">Trilateraci&oacute;n 3 Micr&oacute;fonos</span>
+                                <span class="bg-slate-800 text-cyan-400 text-xs px-3 py-1 rounded-full border border-slate-700">Pantalla Facial Expresiva</span>
+                                <span class="bg-slate-800 text-indigo-400 text-xs px-3 py-1 rounded-full border border-slate-700">Canales Ac&uacute;sticos</span>
+                                <span class="bg-slate-800 text-blue-300 text-xs px-3 py-1 rounded-full border border-slate-700">Chasis PETG &Oslash;30 cm</span>
+                                <span class="bg-slate-800 text-cyan-300 text-xs px-3 py-1 rounded-full border border-slate-700">IA Conversacional</span>
+                            </div>
+                            <p class="text-xs text-slate-500 uppercase tracking-widest mb-3 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-images text-cyan-400/60 text-xs"></i> Galer&iacute;a ORBIT Final &mdash; clic para ampliar</p>
+                            <div class="flex gap-3 overflow-x-auto pb-3 gallery-scroll">
+                                <img class="thumb-45" src="assets/Orbit/orbit.png"               data-gal="gf" data-caption="ORBIT &mdash; render oficial completo con pantalla facial" alt="ORBIT render oficial">
+                                <img class="thumb-45" src="assets/Oyecaja/oyecaja.jpg"           data-gal="gf" data-caption="ORBIT &mdash; en teatro bajo luces de escenario" alt="ORBIT en teatro">
+                                <img class="thumb-45" src="assets/Orbit/orbitprogress.jpg"       data-gal="gf" data-caption="ORBIT &mdash; cuerpo final en construcci&oacute;n" alt="ORBIT en progreso">
+                            </div>
+                        </div>
+                        <div class="w-full md:w-1/2 order-1 md:order-2">
+                            <img class="stage-hero" src="assets/Orbit/orbit.png"
+                                 style="object-fit:contain; background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%); object-position:center;"
+                                 alt="ORBIT &mdash; render oficial">
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-center mt-12"><div class="flex flex-col items-center gap-1"><div class="w-px h-8 bg-gradient-to-b from-cyan-400 to-blue-400"></div><i class="fa-solid fa-chevron-down text-cyan-400 text-xs"></i></div></div>
+            </div>
+
+            <!-- Del Boceto al CAD — no etapa label -->
+            <div class="relative mb-20">
+                <div class="flex flex-col md:flex-row items-start gap-10">
+                    <div class="w-full md:w-1/2 order-2 md:order-1 flex flex-col">
+                        <h3 class="text-2xl font-extrabold text-white mb-3">Del Boceto al CAD</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">Con el concepto definido, Daniel traslad&oacute; cada idea a geometr&iacute;a 3D precisa en <strong class="text-slate-300">Rhino 8</strong>. El chasis circular de 30 cm, los canales de o&iacute;do y el m&oacute;dulo superior se ingeniaron digitalmente antes de extruir un solo gramo de filamento. En esta etapa se definieron dimensiones, tolerancias y especificaciones &mdash; convirtiendo la creatividad en realidad fabricable.</p>
+                        <p class="text-slate-500 text-xs italic mb-6">La geometr&iacute;a ac&uacute;stica determin&oacute; el di&aacute;metro del chasis: la f&iacute;sica, no la est&eacute;tica, fij&oacute; el tama&ntilde;o.</p>
+                        <p class="text-xs text-slate-500 uppercase tracking-widest mb-3 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-images text-cyan-400/60 text-xs"></i> Proceso CAD &mdash; clic para ampliar</p>
+                        <div class="flex gap-3 overflow-x-auto pb-3 gallery-scroll">
+                            <img class="thumb-45" src="assets/IMG/fromsketch.jpg"                              data-gal="g5" data-caption="Del boceto al CAD &mdash; modelando en Rhino 8 con motores al lado" alt="Modelando en Rhino 8">
+                            <img class="thumb-45" src="assets/Oyecaja/oyecajaextra2.jpg"       data-gal="g5" data-caption="Del boceto al CAD &mdash; render CAD del dise&ntilde;o final con anillo" alt="Render CAD final">
+                            <img class="thumb-45" src="assets/Oyecaja/oyecajawallsketch.jpg"   data-gal="g5" data-caption="Del boceto al CAD &mdash; vista CAD en pizarra con boceto verde" alt="CAD en pizarra">
+                            <img class="thumb-45" src="assets/IMG/20260422_172043.jpg"                         data-gal="g5" data-caption="Del boceto al CAD &mdash; detalle del modelo 3D" alt="Detalle modelo 3D">
+                        </div>
+                    </div>
+                    <div class="w-full md:w-1/2 order-1 md:order-2">
+                        <img class="stage-hero" src="assets/IMG/fromsketch.jpg" style="object-position:center top;" alt="Del boceto al CAD &mdash; modelando en Rhino">
+                    </div>
+                </div>
+                <div class="flex justify-center mt-12"><div class="flex flex-col items-center gap-1"><div class="w-px h-8 bg-gradient-to-b from-cyan-400 to-blue-400"></div><i class="fa-solid fa-chevron-down text-blue-400 text-xs"></i></div></div>
+            </div>
+
+            <!-- Construir, Romper, Reconstruir — no etapa label -->
+            <div class="relative">
+                <div class="flex flex-col md:flex-row items-start gap-10">
+                    <div class="w-full md:w-1/2">
+                        <img class="stage-hero" src="assets/Oyecaja/oyecajatirro.jpg" style="object-position:center center;" alt="Construir &mdash; chasis ORBIT en taller sin esfera">
+                    </div>
+                    <div class="w-full md:w-1/2 flex flex-col">
+                        <h3 class="text-2xl font-extrabold text-white mb-3">Construir, Romper, Reconstruir</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">La construcci&oacute;n f&iacute;sica se extendi&oacute; de marzo a abril de 2026. El filamento PETG se imprimi&oacute; capa a capa. Los motores se calibraron, los canales ac&uacute;sticos se probaron para reducir el eco y la posici&oacute;n de los micr&oacute;fonos se itera hasta que las matem&aacute;ticas de trilateraci&oacute;n coincidieron con el comportamiento real.</p>
+                        <p class="text-slate-500 text-xs italic mb-6">La pizarra del laboratorio se convirti&oacute; en un documento vivo &mdash; ecuaciones y diagramas actualizados despu&eacute;s de cada sesi&oacute;n.</p>
+                        <p class="text-xs text-slate-500 uppercase tracking-widest mb-3 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-images text-blue-400/60 text-xs"></i> Galer&iacute;a de construcci&oacute;n &mdash; clic para ampliar</p>
+                        <div class="flex gap-3 overflow-x-auto pb-3 gallery-scroll">
+                            <img class="thumb-45" src="assets/Oyecaja/oyecajatirro.jpg"         data-gal="g6" data-caption="Construcci&oacute;n &mdash; ORBIT sin cuerpo superior, estructura visible" alt="ORBIT sin esfera">
+                            <img class="thumb-45" src="assets/Oyecaja/oyecajaextra.jpg"         data-gal="g6" data-caption="Construcci&oacute;n &mdash; ensamblaje del chasis amarillo en el lab" alt="Ensamblaje chasis amarillo">
+                            <img class="thumb-45" src="assets/Oyecaja/oyecajapresentation.jpg"  data-gal="g6" data-caption="Construcci&oacute;n &mdash; ajustando componentes bajo luz de escenario" alt="Ajuste bajo luces de escenario">
+                            <img class="thumb-45" src="assets/IMG/20260423_170829.jpg"                          data-gal="g6" data-caption="Construcci&oacute;n &mdash; dibujo isom&eacute;trico explosionado ORBIT" alt="Dibujo isom&eacute;trico ORBIT">
+                            <img class="thumb-45" src="assets/IMG/20260423_190315.jpg"                          data-gal="g6" data-caption="Construcci&oacute;n &mdash; Orbit V1.0 diagrama en pizarra" alt="Orbit V1.0 en pizarra">
+                            <img class="thumb-45" src="assets/IMG/20260407_153805.jpg"                          data-gal="g6" data-caption="Construcci&oacute;n &mdash; ensamblaje 7 de abril 2026" alt="Ensamblaje 7 abril">
+                            <img class="thumb-45" src="assets/IMG/20260407_162150.jpg"                          data-gal="g6" data-caption="Construcci&oacute;n &mdash; f&oacute;rmulas de tri&aacute;ngulo ac&uacute;stico" alt="F&oacute;rmulas ac&uacute;stica">
+                            <img class="thumb-45" src="assets/IMG/20260420_173135.jpg"                          data-gal="g6" data-caption="Construcci&oacute;n &mdash; progreso 20 de abril" alt="Progreso 20 abril">
+                            <img class="thumb-45" src="assets/IMG/20260422_181933.jpg"                          data-gal="g6" data-caption="Construcci&oacute;n &mdash; Boolean Dif boceto en pizarra" alt="Boolean Dif pizarra">
+                            <img class="thumb-45" src="assets/IMG/20260423_183621.jpg"                          data-gal="g6" data-caption="Construcci&oacute;n &mdash; detalle ORBIT 23 de abril" alt="Detalle ORBIT 23 abril">
+                            <img class="thumb-45" src="assets/IMG/20260423_183649.jpg"                          data-gal="g6" data-caption="Construcci&oacute;n &mdash; vista frontal ORBIT 23 de abril" alt="Vista frontal ORBIT">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- THE PROJECT -->
+    <section id="project" class="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-slate-800">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <span class="text-cyan-400 font-bold uppercase tracking-widest text-sm block mb-2">Hardware</span>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-white">El Proyecto</h2>
+            <p class="text-slate-400 mt-3">Componentes y arquitectura t&eacute;cnica de ORBIT.</p>
+        </div>
+        <div class="border border-slate-800 rounded-2xl p-8 bg-slate-950/40 shadow-inner">
+            <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2"><i class="fa-solid fa-list-check text-cyan-400"></i> Componentes de Hardware</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 text-xs">
+                <a href="https://www.raspberrypi.com/products/raspberry-pi-5/" target="_blank" class="bg-slate-900 p-3 rounded-xl border border-slate-800/60 text-slate-400 hover:text-cyan-400 hover:border-cyan-400/50 transition-all duration-200 shadow-sm block">
+                    <strong class="text-slate-200 block mb-0.5">Procesamiento:</strong> Raspberry Pi 5
+                </a>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800/60 text-slate-400 shadow-sm">
+                    <strong class="text-slate-200 block mb-0.5">Ac&uacute;stica:</strong> 3&times; Micr&oacute;fonos (intensimetr&iacute;a)
+                </div>
+                <a href="https://www.amazon.com/dp/B0B1MJJLJP/" target="_blank" class="bg-slate-900 p-3 rounded-xl border border-slate-800/60 text-slate-400 hover:text-cyan-400 hover:border-cyan-400/50 transition-all duration-200 shadow-sm block">
+                    <strong class="text-slate-200 block mb-0.5">Proximidad:</strong> Sensor Ultras&oacute;nico HC-SR04
+                </a>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800/60 text-slate-400 shadow-sm">
+                    <strong class="text-slate-200 block mb-0.5">Movilidad:</strong> 4 Motores &middot; Plataforma M&oacute;vil
+                </div>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800/60 text-slate-400 shadow-sm">
+                    <strong class="text-slate-200 block mb-0.5">Interfaz:</strong> Pantalla Facial Expresiva
+                </div>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800/60 text-slate-400 shadow-sm">
+                    <strong class="text-slate-200 block mb-0.5">Audio:</strong> Parlante &middot; S&iacute;ntesis de Voz
+                </div>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800/60 text-slate-400 shadow-sm">
+                    <strong class="text-slate-200 block mb-0.5">Estructura:</strong> Chasis 3D (&Oslash;30 cm) &middot; PETG
+                </div>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800/60 text-slate-400 shadow-sm">
+                    <strong class="text-slate-200 block mb-0.5">Energ&iacute;a:</strong> Bater&iacute;a LiPo Recargable
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 border-t border-slate-900 py-10 text-center text-xs text-slate-500">
+        <div class="flex justify-center mb-4">
+            <img src="assets/teamlogo.webp" class="w-12 h-12 rounded-xl object-cover opacity-70" alt="Golden Codex">
+        </div>
+        <p class="font-medium text-slate-400">&copy; 2026 Golden Codex Team. Todos los derechos reservados.</p>
+        <p class="mt-1 text-slate-600">World Robot Olympiad &middot; Future Innovators Senior &middot; Edo. Anzo&aacute;tegui, Venezuela</p>
+        <div class="mt-4 flex justify-center gap-6 text-xs font-semibold">
+            <span class="inline-flex items-center gap-1.5 text-slate-500"><span class="w-2.5 h-2.5 rounded-full bg-blue-700"></span> Azul Profundo</span>
+            <span class="inline-flex items-center gap-1.5 text-slate-500"><span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span> Azul &Oacute;rbita</span>
+            <span class="inline-flex items-center gap-1.5 text-slate-500"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span> Cian Ac&uacute;stico</span>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script>
+    /* ── LIGHTBOX ── */
+    (function() {
+        const lb      = document.getElementById('lightbox');
+        const lbImg   = document.getElementById('lightbox-img');
+        const lbCap   = document.getElementById('lightbox-caption');
+        const lbCtr   = document.getElementById('lightbox-counter');
+        const lbClose = document.getElementById('lightbox-close');
+        const lbPrev  = document.getElementById('lightbox-prev');
+        const lbNext  = document.getElementById('lightbox-next');
+        let currentGallery = [], currentIdx = 0;
+        const galleries = {};
+        document.querySelectorAll('img[data-gal]').forEach(img => {
+            const id = img.dataset.gal;
+            if (!galleries[id]) galleries[id] = [];
+            galleries[id].push({ src: img.src, caption: img.dataset.caption || img.alt });
+        });
+        function openLightbox(galId, idx) {
+            currentGallery = galleries[galId] || [];
+            currentIdx = idx;
+            showCurrent();
+            lb.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeLightbox() { lb.classList.remove('active'); document.body.style.overflow = ''; }
+        function showCurrent() {
+            if (!currentGallery.length) return;
+            const item = currentGallery[currentIdx];
+            lbImg.src = item.src;
+            lbCap.textContent = item.caption || '';
+            lbCtr.textContent = (currentIdx + 1) + ' / ' + currentGallery.length;
+        }
+        function prev() { currentIdx = (currentIdx - 1 + currentGallery.length) % currentGallery.length; showCurrent(); }
+        function next() { currentIdx = (currentIdx + 1) % currentGallery.length; showCurrent(); }
+        document.querySelectorAll('img[data-gal]').forEach(img => {
+            img.addEventListener('click', () => {
+                const galId = img.dataset.gal;
+                const idx = (galleries[galId] || []).findIndex(item => item.src === img.src);
+                openLightbox(galId, Math.max(0, idx));
+            });
+        });
+        lbClose.addEventListener('click', closeLightbox);
+        lbPrev.addEventListener('click', prev);
+        lbNext.addEventListener('click', next);
+        lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
+        document.addEventListener('keydown', e => {
+            if (!lb.classList.contains('active')) return;
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowLeft') prev();
+            if (e.key === 'ArrowRight') next();
+        });
+    })();
+    </script>
+    <script>
+    /* ── HERO MOSAIC CYCLING ── */
+    (function(){
+        // Images sourced ONLY from assets/FRONT/ folder
+        const ALL_IMAGES = [
+            { src: 'assets/FRONT/FRONT.jpg',                pos: 'center 30%'   },
+            { src: 'assets/FRONT/team.jpg',                 pos: 'center 20%'   },
+            { src: 'assets/FRONT/oyecajapresentation.jpg',  pos: 'center 40%'   },
+            { src: 'assets/FRONT/oyecajatirro.jpg',         pos: 'center center' },
+            { src: 'assets/FRONT/oyecajaextra2.jpg',        pos: 'center center' },
+            { src: 'assets/FRONT/orbitprogress.jpg',        pos: 'center top'   },
+            { src: 'assets/FRONT/oyecajafront.png',         pos: 'center center' },
+            { src: 'assets/FRONT/fromsketch.jpg',           pos: 'center center' },
+            { src: 'assets/FRONT/bb8sketch.jpg',            pos: 'center center' },
+            { src: 'assets/FRONT/bb8sketchfront.jpg',       pos: '62% 35%'      },
+            { src: 'assets/FRONT/20260423_183649.jpg',      pos: 'center center' },
+            { src: 'assets/FRONT/team copy.jpg',            pos: 'center center' },
+            { src: 'assets/FRONT/work.jpg',                 pos: 'center 40%'   },
+        ];
+
+        const mosaic = document.getElementById('hero-mosaic');
+        const dots   = document.querySelectorAll('.hero-dot');
+
+        // If FRONT/ has no images, the gradient background shows automatically
+        const grad = document.getElementById('hero-gradient');
+        if (ALL_IMAGES.length === 0) {
+            if (grad) grad.style.display = 'block';
+            return;
+        }
+        // Hide gradient when images are available
+        if (grad) grad.style.display = 'none';
+
+        // Determine number of columns based on viewport width
+        function cols() {
+            return window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3;
+        }
+
+        // Build cells
+        let cells = [];
+        function buildCells() {
+            mosaic.innerHTML = '';
+            cells = [];
+            const n = cols();
+            for (let i = 0; i < n; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'mosaic-cell';
+                const img = document.createElement('img');
+                img.className = 'visible';
+                cell.appendChild(img);
+                mosaic.appendChild(cell);
+                cells.push({ cell, img });
+            }
+        }
+
+        // Assign an image set to the cells
+        let setIdx = 0;
+        function getSets() {
+            const n = cells.length;
+            const sets = [];
+            for (let i = 0; i < ALL_IMAGES.length; i += n) {
+                const set = [];
+                for (let j = 0; j < n; j++) set.push(ALL_IMAGES[(i + j) % ALL_IMAGES.length]);
+                sets.push(set);
+            }
+            return sets;
+        }
+
+        function applySet(idx, animate) {
+            const sets = getSets();
+            setIdx = (idx + sets.length) % sets.length;
+            const set = sets[setIdx];
+            cells.forEach((c, i) => {
+                const item = set[i];
+                if (!animate) {
+                    c.img.src = item.src;
+                    c.img.style.objectPosition = item.pos;
+                    c.img.className = 'visible';
+                    return;
+                }
+                // Fade out
+                c.img.className = 'leaving';
+                setTimeout(() => {
+                    c.img.src = item.src;
+                    c.img.style.objectPosition = item.pos;
+                    c.img.className = 'entering';
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => { c.img.className = 'visible'; });
+                    });
+                }, 600);
+            });
+            // Update dots
+            const sets2 = getSets();
+            dots.forEach((d, i) => {
+                d.classList.toggle('active', i === setIdx % dots.length);
+            });
+        }
+
+        let timer = null;
+        function startAuto() { timer = setInterval(() => applySet(setIdx + 1, true), 5000); }
+        function resetAuto() { clearInterval(timer); startAuto(); }
+
+        dots.forEach(d => d.addEventListener('click', () => { applySet(+d.dataset.idx, true); resetAuto(); }));
+
+        buildCells();
+        applySet(0, false);
+        startAuto();
+
+        // Rebuild on resize if col count changes
+        let lastCols = cols();
+        window.addEventListener('resize', () => {
+            if (cols() !== lastCols) { lastCols = cols(); buildCells(); applySet(setIdx, false); }
+        });
+    })();
+    </script>
+    <script src="script.js"></script>
+
+    <!-- ── SOURCE CODE PASSWORD GATE ── -->
+    <div id="sc-overlay" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(2,6,23,0.97); backdrop-filter:blur(8px);">
+
+        <!-- Password gate (shown first) -->
+        <div id="sc-gate" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;">
+            <div style="background:#0f172a; border:1px solid #1e293b; border-radius:1.5rem; padding:2.5rem 2rem; width:min(420px,90vw); text-align:center; box-shadow:0 25px 80px rgba(0,0,0,.7);">
+                
+                <h2 style="color:#f8fafc; font-size:1.4rem; font-weight:800; margin-bottom:.4rem;">Código Fuente</h2>
+                <p style="color:#94a3b8; font-size:.875rem; margin-bottom:1.75rem;">Esta sección es privada. Ingresa la contraseña para continuar.</p>
+                <input id="sc-input" type="password" placeholder="Contraseña"
+                    style="width:100%; padding:.75rem 1rem; background:#1e293b; border:1px solid #334155; border-radius:.75rem; color:#f8fafc; font-size:1rem; outline:none; margin-bottom:.75rem; box-sizing:border-box; letter-spacing:.15em; text-align:center;"
+                    onkeydown="if(event.key==='Enter') checkPassword()">
+                <div id="sc-error" style="color:#f87171; font-size:.8rem; min-height:1.2rem; margin-bottom:.75rem;"></div>
+                <div style="display:flex; gap:.75rem; justify-content:center;">
+                    <button onclick="closeSourceCode()"
+                        style="flex:1; padding:.75rem; background:#1e293b; border:1px solid #334155; border-radius:.75rem; color:#94a3b8; font-weight:600; cursor:pointer; transition:background .2s;"
+                        onmouseover="this.style.background='#273448'" onmouseout="this.style.background='#1e293b'">Cancelar</button>
+                    <button onclick="checkPassword()"
+                        style="flex:1; padding:.75rem; background:#22d3ee; border:none; border-radius:.75rem; color:#020617; font-weight:800; cursor:pointer; transition:background .2s;"
+                        onmouseover="this.style.background='#67e8f9'" onmouseout="this.style.background='#22d3ee'">Entrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- iframe viewer (hidden until correct password) -->
+        <div id="sc-viewer" style="display:none; position:absolute; inset:0; flex-direction:column;">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:.6rem 1.25rem; background:#0f172a; border-bottom:1px solid #1e293b; flex-shrink:0;">
+                <div style="display:flex; align-items:center; gap:.6rem;">
+                    <span style="color:#22d3ee; font-weight:800; font-size:.95rem;">Código Fuente — ORBIT</span>
+                </div>
+                <button onclick="closeSourceCode()"
+                    style="background:#1e293b; border:1px solid #334155; border-radius:.6rem; color:#94a3b8; padding:.35rem .9rem; cursor:pointer; font-size:.85rem; font-weight:600;"
+                    onmouseover="this.style.background='#273448'" onmouseout="this.style.background='#1e293b'">✕ Cerrar</button>
+            </div>
+            <iframe id="sc-frame" src="" style="flex:1; width:100%; border:none; background:#020617;"></iframe>
+        </div>
+    </div>
+
+    <script>
+    const SC_PASS = '50025002';
+    function openSourceCode() {
+        document.getElementById('sc-overlay').style.display = 'block';
+        document.getElementById('sc-gate').style.display = 'flex';
+        document.getElementById('sc-viewer').style.display = 'none';
+        document.getElementById('sc-input').value = '';
+        document.getElementById('sc-error').textContent = '';
+        setTimeout(() => document.getElementById('sc-input').focus(), 100);
+        document.body.style.overflow = 'hidden';
+    }
+    function closeSourceCode() {
+        document.getElementById('sc-overlay').style.display = 'none';
+        document.getElementById('sc-frame').src = '';
+        document.body.style.overflow = '';
+    }
+    function checkPassword() {
+        const val = document.getElementById('sc-input').value;
+        if (val === SC_PASS) {
+            document.getElementById('sc-gate').style.display = 'none';
+            const viewer = document.getElementById('sc-viewer');
+            viewer.style.display = 'flex';
+            document.getElementById('sc-frame').src = 'index2.html';
+        } else {
+            const err = document.getElementById('sc-error');
+            err.textContent = 'Contraseña incorrecta. Intenta de nuevo.';
+            document.getElementById('sc-input').value = '';
+            document.getElementById('sc-input').focus();
+            document.getElementById('sc-input').style.borderColor = '#f87171';
+            setTimeout(() => { err.textContent = ''; document.getElementById('sc-input').style.borderColor = '#334155'; }, 2500);
+        }
+    }
+    // Close on overlay click (only on the overlay itself, not children)
+    document.getElementById('sc-overlay').addEventListener('click', function(e) {
+        if (e.target === this) closeSourceCode();
+    });
+    // ESC key closes
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeSourceCode();
+    });
+    </script>
+
+</body>
+</html>

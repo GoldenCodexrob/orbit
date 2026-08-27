@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Codex - ORBIT WRO 2026</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-18px); }
+        }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.15; }
+            50% { opacity: 0.28; }
+        }
+        .content-blur { animation: pulse-glow 6s ease-in-out infinite; }
+        .card-glow:hover { box-shadow: 0 0 30px rgba(59,130,246,.08); }
+        .orbit-float { animation: float 7s ease-in-out infinite; }
+        .orbit-float-slow { animation: float 10s ease-in-out infinite; animation-delay: -3s; }
+        .gallery-scroll::-webkit-scrollbar { height: 4px; }
+        .gallery-scroll::-webkit-scrollbar-track { background: #0f172a; }
+        .gallery-scroll::-webkit-scrollbar-thumb { background: #1d4ed8; border-radius: 2px; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-blue-400 selection:text-slate-950">
+
+    <!-- NAVBAR -->
+    <nav class="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-500 to-cyan-400 flex items-center justify-center font-black text-white shadow-lg shadow-blue-600/20">G</div>
+                    <span class="font-extrabold text-xl tracking-wider text-white">GOLDEN CODEX</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#home"    class="text-slate-300 hover:text-cyan-400 font-medium transition-colors">Home</a>
+                    <a href="#team"    class="text-slate-300 hover:text-blue-400 font-medium transition-colors">Team</a>
+                    <a href="#goals"   class="text-slate-300 hover:text-blue-300 font-medium transition-colors">Goals</a>
+                    <a href="#history" class="text-slate-300 hover:text-cyan-400 font-medium transition-colors">Design History</a>
+                    <a href="#project" class="text-slate-300 hover:text-cyan-400 font-medium transition-colors">The Project</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <header id="home" class="relative min-h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden border-b border-slate-800">
+        <div class="absolute top-1/4 left-1/3 w-80 h-80 bg-blue-700/15 rounded-full blur-3xl content-blur"></div>
+        <div class="absolute bottom-1/3 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl content-blur" style="animation-delay:-2s;"></div>
+        <div class="absolute top-1/2 right-1/3 w-72 h-72 bg-indigo-600/8 rounded-full blur-3xl content-blur" style="animation-delay:-4s;"></div>
+        <div class="relative max-w-4xl mx-auto text-center px-4 z-10">
+            <div class="flex justify-center items-center gap-1 mb-8">
+                <span class="w-8 h-1.5 bg-blue-700 rounded-full"></span>
+                <span class="w-16 h-1.5 bg-blue-400 rounded-full"></span>
+                <span class="w-10 h-1.5 bg-cyan-400 rounded-full"></span>
+            </div>
+            <span class="text-xs uppercase tracking-widest text-slate-300 font-bold bg-slate-900 px-4 py-1.5 rounded-full border border-slate-800">WRO Future Innovators Senior 2026</span>
+            <div class="flex justify-center mt-8 mb-4">
+                <div class="orbit-float">
+                    <img src="../IMG/Screenshot_20260804_124119_Instagram.jpg" class="w-48 h-48 rounded-full object-cover shadow-2xl shadow-blue-700/40 border-2 border-blue-500/30" alt="Robot ORBIT">
+                </div>
+            </div>
+            <h1 class="text-5xl sm:text-7xl font-black tracking-tight text-white mt-4 mb-2">ORBIT</h1>
+            <p class="text-slate-400 text-sm tracking-widest uppercase mb-6">Or&aacute;culo de Ra&iacute;ces Basado en Identificaci&oacute;n por Trilateraci&oacute;n</p>
+            <div class="inline-block bg-slate-900/80 backdrop-blur-sm border border-slate-800 px-6 py-3 rounded-2xl mb-8 shadow-xl">
+                <p class="text-lg sm:text-xl font-medium tracking-wide text-slate-200">&ldquo;<span class="text-cyan-400 font-semibold">Tu embajador cultural</span>, <span class="text-blue-400 font-semibold">tu gu&iacute;a a las ra&iacute;ces</span>.&rdquo;</p>
+            </div>
+            <p class="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                Transformamos las visitas a museos, aeropuertos y espacios p&uacute;blicos en experiencias culturales memorables a trav&eacute;s de un robot social con inteligencia artificial que acerca la cultura venezolana a cada visitante.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <a href="#project" class="w-full sm:w-auto inline-flex items-center justify-center px-8 h-12 font-bold tracking-wide text-slate-950 bg-cyan-400 rounded-xl hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-400/20">
+                    <i class="fa-solid fa-robot mr-2"></i> Explorar la Soluci&oacute;n
+                </a>
+                <a href="#team" class="w-full sm:w-auto inline-flex items-center justify-center px-8 h-12 font-bold tracking-wide text-slate-300 bg-slate-800 rounded-xl hover:bg-slate-700 transition-all border border-slate-700">Conocer al Equipo</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- TEAM -->
+    <section id="team" class="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-slate-800">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <span class="text-blue-400 font-bold uppercase tracking-widest text-sm block mb-2">Estudiantes Senior</span>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Conoce al Equipo</h2>
+            <p class="text-slate-400 mt-2">Golden Codex &middot; Lecher&iacute;a, Estado Anzo&aacute;tegui, Venezuela</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Daniel -->
+            <div class="bg-slate-900/60 border border-slate-800 p-8 rounded-2xl relative overflow-hidden hover:border-blue-500/40 transition-all shadow-md flex flex-col">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-blue-600"></div>
+                <div class="flex justify-center mb-5">
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-blue-800 to-blue-500 flex items-center justify-center text-3xl font-black text-white shadow-lg">D</div>
+                </div>
+                <h3 class="text-xl font-bold text-white text-center">Daniel Guzm&aacute;n</h3>
+                <p class="text-xs text-blue-400 font-semibold tracking-wider uppercase text-center mb-4">Modelado Digital &middot; 17 a&ntilde;os</p>
+                <p class="text-slate-400 text-sm leading-relaxed text-justify flex-grow">Encargado del modelado digital en <strong class="text-slate-300">Rhino 8</strong>, registrando toda la geometr&iacute;a de fabricaci&oacute;n. Supervisa la estructura y la integraci&oacute;n f&iacute;sica y digital de los componentes del sistema.</p>
+            </div>
+            <!-- Bruno -->
+            <div class="bg-slate-900/60 border border-slate-800 p-8 rounded-2xl relative overflow-hidden hover:border-cyan-500/40 transition-all shadow-md flex flex-col">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-cyan-500"></div>
+                <div class="flex justify-center mb-5">
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-cyan-800 to-cyan-500 flex items-center justify-center text-3xl font-black text-white shadow-lg">B</div>
+                </div>
+                <h3 class="text-xl font-bold text-white text-center">Bruno Prandini</h3>
+                <p class="text-xs text-cyan-400 font-semibold tracking-wider uppercase text-center mb-4">Movimiento &middot; 17 a&ntilde;os</p>
+                <p class="text-slate-400 text-sm leading-relaxed text-justify flex-grow">Dise&ntilde;a y ensambla los mecanismos de locomoci&oacute;n, integr&aacute;ndolos con la estructura impresa en 3D. Supervisa la detecci&oacute;n de personas mediante el <strong class="text-slate-300">sensor ultras&oacute;nico</strong> y la plataforma m&oacute;vil de 4 motores.</p>
+            </div>
+            <!-- Max -->
+            <div class="bg-slate-900/60 border border-slate-800 p-8 rounded-2xl relative overflow-hidden hover:border-indigo-500/40 transition-all shadow-md flex flex-col">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-indigo-500"></div>
+                <div class="flex justify-center mb-5">
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-800 to-indigo-500 flex items-center justify-center text-3xl font-black text-white shadow-lg">M</div>
+                </div>
+                <h3 class="text-xl font-bold text-white text-center">Maximiliano Rodr&iacute;guez</h3>
+                <p class="text-xs text-indigo-400 font-semibold tracking-wider uppercase text-center mb-4">Interfaz e IA &middot; 15 a&ntilde;os</p>
+                <p class="text-slate-400 text-sm leading-relaxed text-justify flex-grow">Programa el sistema de <strong class="text-slate-300">trilateraci&oacute;n ac&uacute;stica</strong> mediante 3 micr&oacute;fonos por intensidad. Supervisa las animaciones faciales de ORBIT, la IA conversacional y la detecci&oacute;n facial.</p>
+            </div>
+        </div>
+        <!-- Identity card -->
+        <div class="mt-10 bg-slate-900/40 border border-slate-800 rounded-2xl p-8 relative overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-700 via-blue-400 to-cyan-400"></div>
+            <div class="text-center mb-4">
+                <h3 class="text-xl font-bold text-white">&iquest;Qui&eacute;nes somos?</h3>
+                <p class="text-xs text-blue-400 font-semibold tracking-wider uppercase mt-0.5">Sobre el Equipo</p>
+            </div>
+            <p class="text-slate-300 text-sm leading-relaxed text-justify max-w-4xl mx-auto">Somos un equipo de estudiantes de Lecher&iacute;a, Estado Anzo&aacute;tegui, unidos por el impulso de usar la tecnolog&iacute;a para resolver problemas reales con impacto positivo en la sociedad. Nuestras fortalezas abarcan rob&oacute;tica, programaci&oacute;n, dise&ntilde;o digital y fabricaci&oacute;n digital. Creemos que la innovaci&oacute;n tecnol&oacute;gica puede ser una herramienta poderosa para fortalecer la identidad cultural: que los robots pueden hacer m&aacute;s que automatizar tareas &mdash; pueden conectar personas, transmitir conocimiento y despertar curiosidad por las historias que nos definen.</p>
+        </div>
+    </section>
+
+    <!-- EXECUTIVE SUMMARY (after team) -->
+    <section class="py-20 bg-slate-900/20 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 relative overflow-hidden shadow-2xl">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-cyan-400 via-blue-600 to-indigo-700 opacity-15 blur-3xl pointer-events-none"></div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-10 items-center">
+                    <div class="md:col-span-2">
+                        <span class="text-cyan-400 font-bold uppercase tracking-widest text-sm block mb-2">Resumen Ejecutivo</span>
+                        <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-6">El Proyecto en Resumen</h2>
+                        <div class="space-y-4 text-slate-300 text-base leading-relaxed">
+                            <p><strong>ORBIT</strong> es un robot social antropom&oacute;rfico dise&ntilde;ado para promover la cultura venezolana a trav&eacute;s de experiencias conversacionales accesibles e intuitivas. Su nombre es un acr&oacute;nimo: <em>Or&aacute;culo de Ra&iacute;ces Basado en Identificaci&oacute;n por Trilateraci&oacute;n</em>.</p>
+                            <p>El concepto surgi&oacute; de semanas de lluvias de ideas intensas &mdash; explorando desde cubos con proyecciones hologr&aacute;ficas hasta la mec&aacute;nica de una esfera rodante estilo BB-8. Lo que uni&oacute; todas esas ideas fue una sola pregunta: <strong>&iquest;c&oacute;mo puede un robot conectar genuinamente con las personas y despertar su curiosidad por la cultura venezolana?</strong> La trilateraci&oacute;n ac&uacute;stica fue la respuesta t&eacute;cnica que uni&oacute; todo.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+                                <div class="p-5 bg-slate-900/90 border border-slate-800 border-l-4 border-l-blue-500 rounded-xl shadow-lg">
+                                    <h4 class="font-extrabold text-white text-base mb-2 flex items-center gap-2"><i class="fa-solid fa-ear-listen text-blue-400"></i> Percepci&oacute;n Ac&uacute;stica</h4>
+                                    <p class="text-xs text-slate-400 leading-relaxed">Tres micr&oacute;fonos dentro de canales ac&uacute;sticos en forma de o&iacute;do capturan y comparan intensidades de sonido para estimar con precisi&oacute;n la direcci&oacute;n del hablante.</p>
+                                </div>
+                                <div class="p-5 bg-slate-900/90 border border-slate-800 border-l-4 border-l-cyan-500 rounded-xl shadow-lg">
+                                    <h4 class="font-extrabold text-white text-base mb-2 flex items-center gap-2"><i class="fa-solid fa-comments text-cyan-400"></i> IA Conversacional</h4>
+                                    <p class="text-xs text-slate-400 leading-relaxed">Independientemente del tema inicial, la IA redirige activamente el di&aacute;logo hacia la cultura venezolana: historia, m&uacute;sica, gastronom&iacute;a y monumentos.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-center items-center md:col-span-1 p-4">
+                        <img src="../IMG/IMG-20260423-WA0061.jpg" class="orbit-float-slow w-full max-w-xs rounded-2xl object-cover shadow-2xl shadow-blue-700/30 border border-blue-600/30" alt="Pantalla ORBIT">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- GOALS -->
+    <section id="goals" class="py-24 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-blue-400 font-bold uppercase tracking-widest text-sm block mb-2">Objetivos e Impacto</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Objetivos de ORBIT</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-slate-950 border border-slate-800 p-8 rounded-xl relative overflow-hidden hover:border-slate-700 transition-all card-glow">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-blue-700"></div>
+                    <div class="w-12 h-12 rounded-lg bg-blue-700/15 flex items-center justify-center text-blue-400 mb-6 font-bold text-lg">01</div>
+                    <h3 class="text-xl font-bold text-white mb-3">Divulgaci&oacute;n Cultural</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">ORBIT acerca la historia, m&uacute;sica, gastronom&iacute;a y tradiciones venezolanas a los visitantes mediante conversaciones naturales en tiempo real, convirtiendo cada interacci&oacute;n en un momento de aprendizaje cultural.</p>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 p-8 rounded-xl relative overflow-hidden hover:border-slate-700 transition-all card-glow">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-cyan-500"></div>
+                    <div class="w-12 h-12 rounded-lg bg-cyan-500/15 flex items-center justify-center text-cyan-400 mb-6 font-bold text-lg">02</div>
+                    <h3 class="text-xl font-bold text-white mb-3">Orientaci&oacute;n Ac&uacute;stica</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Mediante trilateraci&oacute;n ac&uacute;stica con 3 micr&oacute;fonos, ORBIT estima la direcci&oacute;n de quien habla, gira hacia esa persona y se acerca aut&oacute;nomamente para lograr una interacci&oacute;n cara a cara natural.</p>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 p-8 rounded-xl relative overflow-hidden hover:border-slate-700 transition-all card-glow">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
+                    <div class="w-12 h-12 rounded-lg bg-indigo-500/15 flex items-center justify-center text-indigo-400 mb-6 font-bold text-lg">03</div>
+                    <h3 class="text-xl font-bold text-white mb-3">Interacci&oacute;n Social</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Un dise&ntilde;o antropom&oacute;rfico con canales ac&uacute;sticos en forma de o&iacute;do y una pantalla facial expresiva que genera confianza y curiosidad tanto en ni&ntilde;os como en adultos &mdash; un compa&ntilde;ero intuitivo para todas las edades.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DESIGN HISTORY TIMELINE -->
+    <section id="history" class="py-24 border-b border-slate-800 bg-slate-950/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-20">
+                <span class="text-cyan-400 font-bold uppercase tracking-widest text-sm block mb-2">El Camino</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Evoluci&oacute;n del Dise&ntilde;o</h2>
+                <p class="text-slate-400 mt-3 leading-relaxed">ORBIT no se construy&oacute; en l&iacute;nea recta. Naci&oacute; de semanas de ideas intensas, callejones sin salida y choques creativos &mdash; desde una caja con hologramas hasta el robot social que es hoy.</p>
+            </div>
+
+            <!-- Stage 1: La Caja -->
+            <div class="relative mb-16">
+                <div class="flex flex-col md:flex-row items-center gap-10">
+                    <div class="w-full md:w-1/2 order-2 md:order-1">
+                        <div class="inline-flex items-center gap-2 bg-blue-900/30 border border-blue-700/40 px-3 py-1 rounded-full mb-4">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                            <span class="text-blue-400 text-xs font-bold uppercase tracking-widest">Etapa 01</span>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-white mb-3">La Caja y el Holograma</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">La primera lluvia de ideas dio como resultado un concepto futurista y atrevido: un robot c&uacute;bico de aristas pronunciadas que proyectar&iacute;a contenido cultural hologr&aacute;fico en el aire. Inspirado en interfaces de ciencia ficci&oacute;n, el equipo explor&oacute; c&oacute;mo una pantalla est&aacute;tica podr&iacute;a atraer visitantes sin interacci&oacute;n f&iacute;sica. La idea era visualmente rica, pero plante&oacute; preguntas inmediatas: &iquest;c&oacute;mo <em>interactuar&iacute;an</em> los visitantes con &eacute;l? &iquest;C&oacute;mo sabr&iacute;a que alguien estaba cerca?</p>
+                        <p class="text-slate-500 text-xs italic">Esta etapa plant&oacute; la semilla: el robot necesitaba poder detectar y acercarse a las personas, no solo mostrar contenido.</p>
+                    </div>
+                    <div class="w-full md:w-1/2 order-1 md:order-2">
+                        <img src="../Prototype and Ideas/CamScanner 08-04-2026 15.02_01.jpg" class="w-full rounded-2xl object-cover shadow-2xl border border-slate-800" alt="Etapa 1 - Boceto de la Caja con dimensiones">
+                    </div>
+                </div>
+                <div class="flex justify-center mt-12">
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="w-px h-8 bg-gradient-to-b from-blue-700 to-blue-400"></div>
+                        <i class="fa-solid fa-chevron-down text-blue-400 text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 2: La Caja (was Cubic Saturn) -->
+            <div class="relative mb-16">
+                <div class="flex flex-col md:flex-row items-center gap-10">
+                    <div class="w-full md:w-1/2">
+                        <img src="../Prototype and Ideas/CamScanner 08-04-2026 15.02_03.jpg" class="w-full rounded-2xl object-cover shadow-2xl border border-slate-800" alt="Etapa 2 - Boceto Oye Caja">
+                    </div>
+                    <div class="w-full md:w-1/2">
+                        <div class="inline-flex items-center gap-2 bg-cyan-900/30 border border-cyan-700/40 px-3 py-1 rounded-full mb-4">
+                            <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                            <span class="text-cyan-400 text-xs font-bold uppercase tracking-widest">Etapa 02</span>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-white mb-3">Oye, La Caja</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">Yendo m&aacute;s lejos, el equipo fusi&oacute;n&oacute; la forma c&uacute;bica con anillos orbitales estilo Saturno &mdash; un gui&ntilde;o al nombre definitivo &ldquo;ORBIT&rdquo;. Este concepto introdujo la idea de un <strong class="text-slate-300">cuerpo giratorio</strong> capaz de orientarse f&iacute;sicamente. Los anillos se exploraron como mecanismo de rotaci&oacute;n y como indicador visual de movimiento. Se sent&iacute;a m&aacute;s vivo, pero la complejidad mec&aacute;nica de los anillos y la forma c&uacute;bica r&iacute;gida result&oacute; intimidante y dif&iacute;cil de fabricar.</p>
+                        <p class="text-slate-500 text-xs italic">Lecci&oacute;n clave: la forma deb&iacute;a sentirse amigable, especialmente para los ni&ntilde;os. La geometr&iacute;a angular se percib&iacute;a intimidante.</p>
+                    </div>
+                </div>
+                <div class="flex justify-center mt-12">
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="w-px h-8 bg-gradient-to-b from-cyan-500 to-blue-400"></div>
+                        <i class="fa-solid fa-chevron-down text-cyan-400 text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 3: BB-8 -->
+            <div class="relative mb-16">
+                <div class="flex flex-col md:flex-row items-center gap-10">
+                    <div class="w-full md:w-1/2 order-2 md:order-1">
+                        <div class="inline-flex items-center gap-2 bg-indigo-900/30 border border-indigo-700/40 px-3 py-1 rounded-full mb-4">
+                            <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+                            <span class="text-indigo-400 text-xs font-bold uppercase tracking-widest">Etapa 03</span>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-white mb-3">La Fase BB-8</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">El equipo busc&oacute; inspiraci&oacute;n en el cine y encontr&oacute; a BB-8 de Star Wars: un robot esf&eacute;rico instant&aacute;neamente adorable. Esta etapa explor&oacute; un <strong class="text-slate-300">cuerpo esf&eacute;rico rodante</strong> con una unidad de cabeza separada encima. La silueta redondeada se sent&iacute;a m&aacute;s amigable y din&aacute;mica. Sin embargo, el reto de ingenieria de mantener una cabeza estable sobre una esfera rodante libre &mdash; especialmente con micr&oacute;fonos y electr&oacute;nica adentro &mdash; result&oacute; impr&aacute;ctico con las herramientas de fabricaci&oacute;n disponibles.</p>
+                        <p class="text-slate-500 text-xs italic">El atractivo de la esfera sobrevivi&oacute;: la redondez se convirti&oacute; en un principio de dise&ntilde;o fundamental del robot final.</p>
+                    </div>
+                    <div class="w-full md:w-1/2 order-1 md:order-2">
+                        <img src="../Prototype and Ideas/CamScanner 08-04-2026 15.02_06.jpg" class="w-full rounded-2xl object-cover shadow-2xl border border-slate-800" alt="Etapa 3 - Robot circular con 3 micr&oacute;fonos">
+                    </div>
+                </div>
+                <div class="flex justify-center mt-12">
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="w-px h-8 bg-gradient-to-b from-indigo-500 to-blue-400"></div>
+                        <i class="fa-solid fa-chevron-down text-indigo-400 text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 4: Del Boceto al CAD -->
+            <div class="relative mb-16">
+                <div class="flex flex-col md:flex-row items-center gap-10">
+                    <div class="w-full md:w-1/2">
+                        <img src="../IMG/20260422_172054.jpg" class="w-full rounded-2xl object-cover shadow-2xl border border-slate-800" alt="Modelado CAD en Rhino 8">
+                    </div>
+                    <div class="w-full md:w-1/2">
+                        <div class="inline-flex items-center gap-2 bg-cyan-900/30 border border-cyan-700/40 px-3 py-1 rounded-full mb-4">
+                            <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                            <span class="text-cyan-400 text-xs font-bold uppercase tracking-widest">Etapa 04 &middot; Modelado Digital</span>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-white mb-3">Del Boceto al CAD</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">Con el concepto definido, Daniel traslad&oacute; cada idea dibujada a mano a geometr&iacute;a 3D precisa en <strong class="text-slate-300">Rhino 8</strong>. El chasis circular de 30 cm, los canales de o&iacute;do y el m&oacute;dulo superior del cuerpo se ingeniaron digitalmente antes de extruir un solo gramo de filamento. En esta etapa se definieron tablas de dimensiones, tolerancias y especificaciones de tornillos &mdash; convirtiendo la creatividad en realidad fabricable.</p>
+                        <p class="text-slate-500 text-xs italic">La geometr&iacute;a ac&uacute;stica determin&oacute; el di&aacute;metro del chasis: la f&iacute;sica, no la est&eacute;tica, fij&oacute; el tama&ntilde;o.</p>
+                    </div>
+                </div>
+                <div class="flex justify-center mt-12">
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="w-px h-8 bg-gradient-to-b from-cyan-400 to-blue-400"></div>
+                        <i class="fa-solid fa-chevron-down text-blue-400 text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 5: Build -->
+            <div class="relative mb-16">
+                <div class="flex flex-col md:flex-row items-center gap-10">
+                    <div class="w-full md:w-1/2 order-2 md:order-1">
+                        <div class="inline-flex items-center gap-2 bg-blue-900/30 border border-blue-700/40 px-3 py-1 rounded-full mb-4">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                            <span class="text-blue-400 text-xs font-bold uppercase tracking-widest">Etapa 05 &middot; Construcci&oacute;n</span>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-white mb-3">Construir, Romper, Reconstruir</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">La construcci&oacute;n f&iacute;sica se extendi&oacute; de marzo a abril de 2026. El filamento PETG se imprimi&oacute; capa a capa. Los motores se calibraron, los canales ac&uacute;sticos se probaron para reducir el eco y la posici&oacute;n de los micr&oacute;fonos se itero hasta que las matem&aacute;ticas de trilateraci&oacute;n coincidieron con el comportamiento real. La pizarra del laboratorio se convirti&oacute; en un documento vivo &mdash; lleno de ecuaciones vectoriales, c&aacute;lculos de motores y diagramas de circuitos actualizados despu&eacute;s de cada sesi&oacute;n de prueba.</p>
+                        <p class="text-slate-500 text-xs italic">Orbit V1.0 en la pizarra: componentes, especificaciones de comportamiento y geometr&iacute;a TDOA en un solo diagrama.</p>
+                    </div>
+                    <div class="w-full md:w-1/2 order-1 md:order-2">
+                        <img src="../IMG/20260423_190315.jpg" class="w-full rounded-2xl object-cover shadow-2xl border border-slate-800" alt="Orbit V1.0 en pizarra">
+                    </div>
+                </div>
+                <!-- Scrollable build photo gallery -->
+                <div class="mt-10">
+                    <p class="text-xs text-slate-500 uppercase tracking-widest mb-3 font-semibold">Galer&iacute;a de Progreso de Construcci&oacute;n</p>
+                    <div class="flex gap-4 overflow-x-auto pb-4 gallery-scroll">
+                        <img src="../IMG/20260423_170829.jpg" class="h-52 w-auto rounded-xl object-cover border border-slate-800 flex-shrink-0 shadow-lg" alt="Dibujo isométrico explosionado ORBIT">
+                        <img src="../IMG/20260317_172125.jpg" class="h-52 w-auto rounded-xl object-cover border border-slate-800 flex-shrink-0 shadow-lg" alt="Laboratorio marzo 2026">
+                        <img src="../IMG/20260325_174024.jpg" class="h-52 w-auto rounded-xl object-cover border border-slate-800 flex-shrink-0 shadow-lg" alt="Progreso de construcci&oacute;n marzo">
+                        <img src="../IMG/20260407_153805.jpg" class="h-52 w-auto rounded-xl object-cover border border-slate-800 flex-shrink-0 shadow-lg" alt="Ensamblaje 7 de abril">
+                        <img src="../IMG/20260407_162150.jpg" class="h-52 w-auto rounded-xl object-cover border border-slate-800 flex-shrink-0 shadow-lg" alt="Componentes 7 de abril">
+                        <img src="../IMG/20260420_173135.jpg" class="h-52 w-auto rounded-xl object-cover border border-slate-800 flex-shrink-0 shadow-lg" alt="Progreso 20 de abril">
+                        <img src="../IMG/20260422_171915.jpg" class="h-52 w-auto rounded-xl object-cover border border-slate-800 flex-shrink-0 shadow-lg" alt="Boceto en pizarra 22 de abril">
+                        <img src="../IMG/20260422_181933.jpg" class="h-52 w-auto rounded-xl object-cover border border-slate-800 flex-shrink-0 shadow-lg" alt="Ensamblaje noche 22 de abril">
+                        <img src="../IMG/20260423_183616.jpg" class="h-52 w-auto rounded-xl object-cover border border-slate-800 flex-shrink-0 shadow-lg" alt="Ensamblaje final 23 de abril">
+                        <img src="../IMG/20260423_183621.jpg" class="h-52 w-auto rounded-xl object-cover border border-slate-800 flex-shrink-0 shadow-lg" alt="Detalle ORBIT 23 de abril">
+                        <img src="../IMG/20260423_183649.jpg" class="h-52 w-auto rounded-xl object-cover border border-slate-800 flex-shrink-0 shadow-lg" alt="Vista frontal ORBIT 23 de abril">
+                    </div>
+                </div>
+                <div class="flex justify-center mt-12">
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="w-px h-8 bg-gradient-to-b from-blue-400 to-cyan-400"></div>
+                        <i class="fa-solid fa-chevron-down text-cyan-400 text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Final -->
+            <div class="relative">
+                <div class="bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border border-cyan-800/40 rounded-3xl p-8 sm:p-12 relative overflow-hidden shadow-2xl">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-cyan-400 via-blue-600 to-indigo-700 opacity-10 blur-3xl pointer-events-none"></div>
+                    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-700 via-cyan-400 to-blue-700"></div>
+                    <div class="flex flex-col md:flex-row items-center gap-10">
+                        <div class="w-full md:w-1/2 order-2 md:order-1">
+                            <div class="inline-flex items-center gap-2 bg-cyan-900/40 border border-cyan-600/50 px-3 py-1 rounded-full mb-4">
+                                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                                <span class="text-cyan-400 text-xs font-bold uppercase tracking-widest">Dise&ntilde;o Final &middot; ORBIT V3</span>
+                            </div>
+                            <h3 class="text-2xl font-extrabold text-white mb-3">El Robot que Se Convirti&oacute;</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed mb-4">Cada etapa del camino dej&oacute; su huella. El cuerpo circular de 30 cm &mdash; determinado por los requisitos de ingenier&iacute;a ac&uacute;stica &mdash; evoc&oacute; la fase esf&eacute;rica. Los o&iacute;dos ac&uacute;sticos son una evoluci&oacute;n directa de los experimentos de detecci&oacute;n sonora. El exterior suave y accesible honra las lecciones aprendidas sobre la confianza del usuario. ORBIT es el producto de cada calej&oacute;n sin salida, de cada boceto y de cada debate.</p>
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <span class="bg-slate-800 text-blue-400 text-xs px-3 py-1 rounded-full border border-slate-700">Trilateraci&oacute;n 3 Micr&oacute;fonos</span>
+                                <span class="bg-slate-800 text-cyan-400 text-xs px-3 py-1 rounded-full border border-slate-700">Pantalla Facial Expresiva</span>
+                                <span class="bg-slate-800 text-indigo-400 text-xs px-3 py-1 rounded-full border border-slate-700">Canales Ac&uacute;sticos</span>
+                                <span class="bg-slate-800 text-blue-300 text-xs px-3 py-1 rounded-full border border-slate-700">Chasis PETG &Oslash;30 cm</span>
+                                <span class="bg-slate-800 text-cyan-300 text-xs px-3 py-1 rounded-full border border-slate-700">IA Conversacional</span>
+                            </div>
+                        </div>
+                        <div class="w-full md:w-1/2 order-1 md:order-2">
+                            <img src="../IMG/Screenshot_20260804_124119_Instagram.jpg" class="w-full rounded-2xl object-cover shadow-2xl border border-cyan-800/30" alt="ORBIT Final - WRO 2026">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- THE PROJECT -->
+    <section id="project" class="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-slate-800">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <span class="text-cyan-400 font-bold uppercase tracking-widest text-sm block mb-2">Hardware</span>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-white">El Proyecto</h2>
+            <p class="text-slate-400 mt-3">Componentes y arquitectura t&eacute;cnica de ORBIT.</p>
+        </div>
+        <div class="border border-slate-800 rounded-2xl p-8 bg-slate-950/40 shadow-inner">
+            <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2"><i class="fa-solid fa-list-check text-cyan-400"></i> Componentes de Hardware <span class="text-slate-500 font-normal text-sm">(clic para ver enlace)</span></h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 text-xs">
+                <a href="https://www.raspberrypi.com/products/raspberry-pi-5/" target="_blank" class="bg-slate-900 p-3 rounded-xl border border-slate-800/60 text-slate-400 hover:text-cyan-400 hover:border-cyan-400/50 transition-all duration-200 shadow-sm block">
+                    <strong class="text-slate-200 block mb-0.5">Procesamiento:</strong> Raspberry Pi 5
+                </a>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800/60 text-slate-400 shadow-sm">
+                    <strong class="text-slate-200 block mb-0.5">Ac&uacute;stica:</strong> 3&times; Micr&oacute;fonos (intensimetr&iacute;a)
+                </div>
+                <a href="https://www.amazon.com/dp/B0B1MJJLJP/" target="_blank" class="bg-slate-900 p-3 rounded-xl border border-slate-800/60 text-slate-400 hover:text-cyan-400 hover:border-cyan-400/50 transition-all duration-200 shadow-sm block">
+                    <strong class="text-slate-200 block mb-0.5">Proximidad:</strong> Sensor Ultras&oacute;nico HC-SR04
+                </a>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800/60 text-slate-400 shadow-sm">
+                    <strong class="text-slate-200 block mb-0.5">Movilidad:</strong> 4 Motores &middot; Plataforma M&oacute;vil
+                </div>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800/60 text-slate-400 shadow-sm">
+                    <strong class="text-slate-200 block mb-0.5">Interfaz:</strong> Pantalla Facial Expresiva
+                </div>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800/60 text-slate-400 shadow-sm">
+                    <strong class="text-slate-200 block mb-0.5">Audio:</strong> Parlante &middot; S&iacute;ntesis de Voz
+                </div>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800/60 text-slate-400 shadow-sm">
+                    <strong class="text-slate-200 block mb-0.5">Estructura:</strong> Chasis 3D (&Oslash;30 cm) &middot; PETG
+                </div>
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800/60 text-slate-400 shadow-sm">
+                    <strong class="text-slate-200 block mb-0.5">Energ&iacute;a:</strong> Bater&iacute;a LiPo Recargable
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 border-t border-slate-900 py-10 text-center text-xs text-slate-500">
+        <p class="font-medium text-slate-400">&copy; 2026 Golden Codex Team. Todos los derechos reservados.</p>
+        <p class="mt-1 text-slate-600">World Robot Olympiad &middot; Future Innovators Senior &middot; Edo. Anzo&aacute;tegui, Venezuela</p>
+        <div class="mt-4 flex justify-center gap-6 text-xs font-semibold">
+            <span class="inline-flex items-center gap-1.5 text-slate-500"><span class="w-2.5 h-2.5 rounded-full bg-blue-700"></span> Azul Profundo</span>
+            <span class="inline-flex items-center gap-1.5 text-slate-500"><span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span> Azul &Oacute;rbita</span>
+            <span class="inline-flex items-center gap-1.5 text-slate-500"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span> Cian Ac&uacute;stico</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+</body>
+</html>
