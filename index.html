@@ -390,7 +390,7 @@
                         <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-6">El Proyecto en Resumen</h2>
                         <div class="space-y-4 text-slate-300 text-base leading-relaxed">
                             <p><strong>ORBIT</strong> es un robot social antropom&oacute;rfico dise&ntilde;ado para promover la cultura venezolana a trav&eacute;s de experiencias conversacionales accesibles e intuitivas. Su nombre es un acr&oacute;nimo: <em>Or&aacute;culo de Ra&iacute;ces Basado en Identificaci&oacute;n por Trilateraci&oacute;n</em>.</p>
-                            <p>El concepto surgi&oacute; de semanas de lluvias de ideas intensas &mdash; explorando desde cubos con proyecciones hologr&aacute;ficas hasta la mec&aacute;nica de una esfera rodante estilo BB-8. Lo que uni&oacute; todas esas ideas fue una sola pregunta: <strong>&iquest;c&oacute;mo puede un robot conectar genuinamente con las personas y despertar su curiosidad por la cultura venezolana?</strong></p>
+                            <p>El concepto surgió de semanas de lluvias de ideas intensas &mdash; explorando desde cubos con proyecciones holográficas hasta la mecánica de una esfera rodante estilo BB-8. Lo que unió todas esas ideas fue una sola pregunta: <strong>&iquest;cómo puede un robot conectar genuinamente con las personas y despertar su curiosidad por Venezuela y el mundo?</strong></p>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
                                 <div class="p-5 bg-slate-900/90 border border-slate-800 border-l-4 border-l-blue-500 rounded-xl shadow-lg">
                                     <h4 class="font-extrabold text-white text-base mb-2 flex items-center gap-2"><i class="fa-solid fa-ear-listen text-blue-400"></i> Percepci&oacute;n Ac&uacute;stica</h4>
@@ -938,6 +938,35 @@
                 startCycling();
             }
         });
+
+        // ── SWIPE TO CHANGE on mobile ──
+        var touchStartX = 0;
+        var touchStartY = 0;
+        mosaic.addEventListener('touchstart', function(e) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+        mosaic.addEventListener('touchend', function(e) {
+            var dx = e.changedTouches[0].clientX - touchStartX;
+            var dy = e.changedTouches[0].clientY - touchStartY;
+            // Only register horizontal swipes (more horizontal than vertical, min 40px)
+            if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+                timers.forEach(function(t) { clearTimeout(t); clearInterval(t); });
+                timers = [];
+                if (dx < 0) {
+                    // swipe left → next image
+                    cells.forEach(function(c) { advance(c); });
+                } else {
+                    // swipe right → prev image (go back two, since advance goes +1)
+                    cells.forEach(function(c) {
+                        c.idx = (c.idx - 2 + ALL_IMAGES.length) % ALL_IMAGES.length;
+                        advance(c);
+                    });
+                }
+                // Restart auto-cycle after manual swipe
+                setTimeout(function() { startCycling(); }, FADE + 100);
+            }
+        }, { passive: true });
     })();
     </script>
     <script src="script.js"></script>
