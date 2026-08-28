@@ -940,13 +940,14 @@
         });
 
         // ── SWIPE TO CHANGE on mobile ──
+        var heroEl = document.getElementById('home') || mosaic.parentElement;
         var touchStartX = 0;
         var touchStartY = 0;
-        mosaic.addEventListener('touchstart', function(e) {
+        heroEl.addEventListener('touchstart', function(e) {
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
         }, { passive: true });
-        mosaic.addEventListener('touchend', function(e) {
+        heroEl.addEventListener('touchend', function(e) {
             var dx = e.changedTouches[0].clientX - touchStartX;
             var dy = e.changedTouches[0].clientY - touchStartY;
             // Only register horizontal swipes (more horizontal than vertical, min 40px)
@@ -957,7 +958,7 @@
                     // swipe left → next image
                     cells.forEach(function(c) { advance(c); });
                 } else {
-                    // swipe right → prev image (go back two, since advance goes +1)
+                    // swipe right → prev image
                     cells.forEach(function(c) {
                         c.idx = (c.idx - 2 + ALL_IMAGES.length) % ALL_IMAGES.length;
                         advance(c);
