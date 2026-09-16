@@ -942,28 +942,9 @@ let isAdminUnlocked = false;
 // INIT
 // ═══════════════════════════════════════════════════════════
 async function init() {
-  let stored = [];
-  let deletedIds = new Set();
-  try { deletedIds = new Set(JSON.parse(localStorage.getItem(DELETED_KEY) || '[]')); } catch(e) {}
-
-  // Try JSONBin first (real-time, works on every device instantly)
-  const jsonBinData = await readFromJsonBin();
-  if (jsonBinData !== null) {
-    stored = jsonBinData;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored)); // keep local backup
-  } else {
-    try { stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) {}
-  }
-
-  const storedIds = new Set(stored.map(f => f.id));
-  const preloaded = PRELOADED_FILES.filter(f => !storedIds.has(f.id) && !deletedIds.has(f.id));
-  files = [...preloaded, ...stored];
-
-  if (files.length === 0 && PRELOADED_FILES.length > 0) {
-    localStorage.removeItem(DELETED_KEY);
-    files = [...PRELOADED_FILES, ...stored];
-  }
-
+  files = [...PRELOADED_FILES];
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(DELETED_KEY);
   renderGrid();
 }
 
