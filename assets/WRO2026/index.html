@@ -1,0 +1,2403 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>ORBIT Fleet Command & Analítica IA | WRO 2026</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#111827',
+                            950: '#020617'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Supabase JS Client v2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- QRCode.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        :root {
+            /* Variables Dinámicas para el Tema del Robot Seleccionado */
+            --theme-color: #10B981; /* Default Emerald (Orbit 1) */
+            --theme-glow: rgba(16, 185, 129, 0.25);
+            --theme-bg: rgba(16, 185, 129, 0.12);
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body { 
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background-color: #020617; /* Slate 950 */
+            color: #f8fafc;
+            zoom: 1.10;
+        }
+
+        /* Utilidades dinámicas basadas en la variable CSS */
+        .text-theme { color: var(--theme-color) !important; }
+        .bg-theme { background-color: var(--theme-color) !important; }
+        .border-theme { border-color: var(--theme-color) !important; }
+        .bg-theme-soft { background-color: var(--theme-bg) !important; }
+        
+        .card-glow { transition: box-shadow 0.3s ease, border-color 0.3s ease; }
+        .card-glow:hover { 
+            box-shadow: 0 0 25px var(--theme-glow); 
+            border-color: var(--theme-color) !important;
+        }
+
+        /* Estilo general para tarjetas de cristal */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.7); /* slate-900 */
+            backdrop-filter: blur(14px);
+            border: 1px solid #1e293b; /* slate-800 */
+            border-radius: 1rem;
+        }
+
+        /* Acordeón */
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
+        }
+        .accordion-content.open {
+            max-height: 2500px;
+            padding-bottom: 1.5rem;
+        }
+        .accordion-icon { transition: transform 0.3s ease; }
+        .accordion-button[aria-expanded="true"] .accordion-icon { transform: rotate(180deg); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0b1120; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--theme-color); }
+    </style>
+</head>
+<body class="antialiased flex flex-col min-h-screen selection:bg-emerald-500/30 selection:text-emerald-200">
+
+    <!-- 1. BARRA SUPERIOR (HEADER GLOBAL) -->
+    <header class="sticky top-0 z-40 glass-panel rounded-none border-b border-t-0 border-l-0 border-r-0 bg-slate-950/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-theme-soft text-theme flex items-center justify-center text-xl border border-theme shadow-lg">
+                    <i class="fa-solid fa-satellite-dish"></i>
+                </div>
+                <div>
+                    <div>
+                        <h1 class="font-black text-lg tracking-wider uppercase text-white">ORBIT FLEET COMMAND</h1>
+                        <p class="text-xs text-slate-400 font-mono">Global Operations Center</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones Rápidas del Header -->
+            <div class="flex items-center gap-3">
+                <div class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-xs font-mono font-medium text-emerald-300" id="header-status-indicator">Supabase Live: Conectado</span>
+                </div>
+
+                <button onclick="abrirHistorialModal()" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white border border-slate-700 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-clock-rotate-left text-theme"></i>
+                    <span>Historial (<span id="header-total-count">0</span>)</span>
+                </button>
+
+                <button onclick="abrirModalQR()" class="px-3 py-1.5 rounded-lg bg-theme text-slate-950 text-xs font-bold flex items-center gap-1.5 hover:opacity-90 transition-opacity">
+                    <i class="fa-solid fa-qrcode"></i>
+                    <span>QR Móvil</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        
+        <!-- 2. SELECTOR DE UNIDADES (ÚNICA UNIDAD WRO) -->
+        <div class="mb-8">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 font-mono">
+                SELECCIONAR UNIDAD A MONITOREAR
+            </h2>
+            <div class="max-w-xs" id="unit-selectors">
+                <!-- Botón Orbit 1 -->
+                <button onclick="seleccionarOrbit('orbit_1')" class="unit-btn w-full glass-panel p-4 text-left rounded-2xl ring-2 ring-amber-500/80 bg-slate-900/90 hover:bg-slate-800 transition-all flex items-center justify-between border border-slate-700/60" data-color="#10B981">
+                    <div>
+                        <h3 class="font-bold text-lg text-white">Orbit 1</h3>
+                        <p class="text-xs text-slate-400 flex items-center gap-1.5"><i class="fa-solid fa-plane-departure text-emerald-400"></i> Puerto Rico</p>
+                    </div>
+                    <div id="orbit-1-power-indicator" class="w-10 h-10 rounded-full flex items-center justify-center bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        <i class="fa-solid fa-power-off"></i>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- AREA DE CONTENIDO DEL ROBOT SELECCIONADO -->
+        <div id="robot-dashboard" class="animate-[fadeIn_0.5s_ease-out]">
+            
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-3xl border border-emerald-500/30 shadow-lg shadow-emerald-500/10">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-black text-white" id="active-robot-name">Orbit 1 - Puerto Rico</h2>
+                    <div class="mt-1">
+                        <span class="px-2.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 font-mono inline-block" id="active-robot-status">Activo</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. MÓDULOS DESPLEGABLES (ACORDEÓN) -->
+            <div class="space-y-5">
+
+                <!-- MÓDULO 1: TELEMETRÍA & SALUD DE HARDWARE (DESPLEGADO POR DEFECTO) -->
+                <div class="glass-panel border-l-4 border-theme overflow-hidden">
+                    <button class="accordion-button w-full px-6 py-4 flex items-center justify-between hover:bg-slate-800/50 transition-colors focus:outline-none" aria-expanded="true" onclick="toggleAccordion(this)">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-microchip text-xl text-theme"></i>
+                            <span class="font-bold text-lg text-white">Módulo 1: Telemetría & Salud de Hardware</span>
+                            <span id="telemetry-live-badge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider font-bold">En Vivo</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="telemetry-timestamp" class="text-xs text-slate-400 font-mono hidden sm:inline">--:--:--</span>
+                            <i class="fa-solid fa-chevron-down accordion-icon text-slate-400"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content px-6 open">
+                        <div class="pt-2">
+                            <div class="flex items-center justify-between mb-3">
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2 font-mono">
+                                    <i class="fa-solid fa-battery-half text-theme"></i> Baterías de la Unidad (Voltaje en Vivo)
+                                </p>
+                                <span class="text-[11px] font-mono text-slate-500 hidden sm:inline"><i class="fa-solid fa-database mr-1 text-emerald-400"></i>system_control</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4" id="batteries-grid">
+                                <!-- Insertado por JS -->
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/90 shadow-inner">
+                                    <p class="text-xs text-slate-400 uppercase mb-2 font-mono font-semibold tracking-wider">FAN</p>
+                                    <p class="text-2xl font-black font-mono flex items-center gap-2.5 text-white" id="telemetry-fan"><i class="fa-solid fa-fan text-slate-400"></i> <span>OFF</span></p>
+                                </div>
+                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/90 shadow-inner">
+                                    <p class="text-xs text-slate-400 uppercase mb-2 font-mono font-semibold tracking-wider">SENSORES LIDAR/AUDIO</p>
+                                    <p class="text-2xl font-black font-mono flex items-center gap-2.5 text-emerald-400" id="telemetry-sensors"><i class="fa-solid fa-check-circle"></i> <span>100% OK</span></p>
+                                </div>
+                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/90 shadow-inner">
+                                    <p class="text-xs text-slate-400 uppercase mb-2 font-mono font-semibold tracking-wider">MOTORES BASE</p>
+                                    <p class="text-2xl font-black font-mono flex items-center gap-2.5 text-white" id="telemetry-motors"><i class="fa-solid fa-gear text-slate-300"></i> <span>En Reposo</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MÓDULO 2: GESTIÓN DE PATROCINANTES B2B (INTACTO) -->
+                <div class="glass-panel border-l-4 border-theme overflow-hidden">
+                    <button class="accordion-button w-full px-6 py-4 flex items-center justify-between hover:bg-slate-800/50 transition-colors focus:outline-none" aria-expanded="false" onclick="toggleAccordion(this)">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-store text-xl text-theme"></i>
+                            <span class="font-bold text-lg text-white">Módulo 2: Gestión de Patrocinantes B2B</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down accordion-icon text-slate-400"></i>
+                    </button>
+                    <div class="accordion-content px-6">
+                        <div class="pt-2 flex flex-col md:flex-row gap-6">
+                            <div class="w-full md:w-2/3 bg-slate-950 rounded-lg border border-slate-800 overflow-hidden">
+                                <table class="w-full text-left">
+                                    <thead class="bg-slate-900 border-b border-slate-800">
+                                        <tr>
+                                            <th class="p-3 text-xs uppercase text-slate-400 font-mono">Patrocinante</th>
+                                            <th class="p-3 text-xs uppercase text-slate-400 font-mono">Estado</th>
+                                            <th class="p-3 text-xs uppercase text-slate-400 font-mono">Vistas/QRs Generados</th>
+                                            <th class="p-3 text-xs uppercase text-slate-400 text-right font-mono">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sponsors-list" class="divide-y divide-slate-800 text-sm">
+                                        <!-- Insertado por JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="w-full md:w-1/3 bg-theme-soft border border-theme p-5 rounded-lg flex flex-col justify-between text-center">
+                                <div>
+                                    <div class="w-12 h-12 rounded-xl bg-theme/20 text-theme flex items-center justify-center text-2xl mx-auto mb-2 border border-theme/40">
+                                        <i class="fa-solid fa-qrcode"></i>
+                                    </div>
+                                    <h4 class="font-bold text-base text-white">QRs Exhibidos por Orbit</h4>
+                                    <div class="text-4xl font-black font-mono text-white my-2 flex items-center justify-center gap-2">
+                                        <span id="total-qr-displays">0</span>
+                                        <span class="text-[10px] font-sans px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider font-bold">En Vivo</span>
+                                    </div>
+                                    <p class="text-xs text-slate-300 mb-3">Contador en tiempo real de códigos QR de beneficios y aliados turísticos proyectados por Orbit (8 aliados B2B).</p>
+                                </div>
+                                <div class="w-full p-2.5 rounded-lg bg-slate-950/70 border border-slate-800 text-left text-xs font-mono space-y-1.5">
+                                    <div class="flex justify-between items-center text-slate-400">
+                                        <span>Último QR mostrado:</span>
+                                        <span id="qr-last-time" class="text-emerald-400 font-bold">--:--:--</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-slate-400">
+                                        <span>Sincronización:</span>
+                                        <span id="qr-sync-mode" class="text-sky-400 font-bold flex items-center gap-1">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span> Docker & Cloud
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MÓDULO 3: ANALÍTICA DE CONSULTAS (4 SECCIONES + SUBCATEGORÍAS + SUPABASE FEED) -->
+                <div class="glass-panel border-l-4 border-theme overflow-hidden">
+                    <button class="accordion-button w-full px-6 py-4 flex items-center justify-between hover:bg-slate-800/50 transition-colors focus:outline-none" aria-expanded="true" onclick="toggleAccordion(this)">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-chart-pie text-xl text-theme"></i>
+                            <span class="font-bold text-lg text-white">Módulo 3: Analítica de Consultas & Clasificación Temática</span>
+                            <span class="text-xs px-2.5 py-0.5 rounded-full bg-theme-soft text-theme font-mono font-bold" id="badge-total-consultas">0 Consultas</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-mono border border-emerald-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Supabase Realtime
+                            </span>
+                            <i class="fa-solid fa-chevron-down accordion-icon text-slate-400"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content px-6 open">
+                        <div class="pt-3 space-y-6">
+
+                            <!-- Barra de Resumen Ejecutivo y Botón de Historial -->
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
+                                <div class="flex flex-wrap items-center gap-4 text-xs font-mono">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-slate-400 uppercase">Consultas Totales:</span>
+                                        <span class="text-base font-bold text-white" id="bar-kpi-total">0</span>
+                                    </div>
+                                    <span class="text-slate-700 hidden sm:inline">&bull;</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-slate-400 uppercase">Latencia Media:</span>
+                                        <span class="text-base font-bold text-sky-400" id="bar-kpi-latencia">-- ms</span>
+                                    </div>
+                                    <span class="text-slate-700 hidden sm:inline">&bull;</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-slate-400 uppercase">Idioma:</span>
+                                        <span class="text-base font-bold text-emerald-400" id="bar-kpi-idiomas">--</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-3 w-full md:w-auto">
+                                    <button onclick="abrirHistorialModal()" class="w-full md:w-auto px-4 py-2.5 rounded-lg bg-theme text-slate-950 font-bold text-xs flex items-center justify-center gap-2 hover:opacity-90 shadow-md transition-all">
+                                        <i class="fa-solid fa-clock-rotate-left"></i>
+                                        <span>Revisar Historial Completo</span>
+                                        <span class="px-2 py-0.5 rounded bg-slate-950/20 font-mono text-[11px]" id="bar-btn-count">0</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- LAS 4 SECCIONES PRINCIPALES DE CLASIFICACIÓN CON SUBCATEGORÍAS -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                
+                                <!-- SECCIÓN 1: PREGUNTAS CULTURALES -->
+                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 hover:border-amber-500/50 transition-all card-glow flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center gap-2.5">
+                                                <div class="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                                                    <i class="fa-solid fa-earth-americas text-base"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-bold text-sm text-white">Preguntas Culturales</h4>
+                                                    <span class="text-[10px] text-slate-400 font-mono">Folclore, música y raíces</span>
+                                                </div>
+                                            </div>
+                                            <span id="badge-pct-cultural" class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">0%</span>
+                                        </div>
+
+                                        <div class="flex items-baseline gap-2 mb-2">
+                                            <span class="text-3xl font-black text-amber-400 font-mono" id="count-cultural">0</span>
+                                            <span class="text-xs text-slate-400">interacciones</span>
+                                        </div>
+
+                                        <!-- Barra de Progreso -->
+                                        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-3">
+                                            <div id="bar-cultural" class="bg-amber-400 h-full w-[0%] transition-all duration-500"></div>
+                                        </div>
+
+                                        <!-- Subcategorías -->
+                                        <div class="space-y-1.5 text-xs text-slate-300 divide-y divide-slate-800/40 pt-1">
+                                            <div class="flex justify-between items-center py-1">
+                                                <span class="flex items-center gap-1.5">
+                                                    <span class="text-sm">🇵🇷</span> Puerto Rico
+                                                </span>
+                                                <span class="font-mono font-bold text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-800" id="sub-cultural-pr">0</span>
+                                            </div>
+                                            <div class="flex justify-between items-center py-1">
+                                                <span class="flex items-center gap-1.5">
+                                                    <span class="text-sm">🇻🇪</span> Venezuela
+                                                </span>
+                                                <span class="font-mono font-bold text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-800" id="sub-cultural-vzla">0</span>
+                                            </div>
+                                            <div class="flex justify-between items-center py-1">
+                                                <span class="flex items-center gap-1.5">
+                                                    <i class="fa-solid fa-user-tag text-[10px] text-amber-400/80"></i> Personajes & Figuras
+                                                </span>
+                                                <span class="font-mono font-bold text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-800" id="sub-cultural-people">0</span>
+                                            </div>
+                                            <div class="flex justify-between items-center py-1">
+                                                <span class="flex items-center gap-1.5">
+                                                    <i class="fa-solid fa-scroll text-[10px] text-amber-400/80"></i> Historia & Costumbres
+                                                </span>
+                                                <span class="font-mono font-bold text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-800" id="sub-cultural-history">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button onclick="filtrarPorCategoriaYVer('cultural')" class="mt-3.5 w-full py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="fa-solid fa-eye text-[11px]"></i> Explorar Culturales
+                                    </button>
+                                </div>
+
+                                <!-- SECCIÓN 2: PREGUNTAS COMERCIALES -->
+                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 hover:border-emerald-500/50 transition-all card-glow flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center gap-2.5">
+                                                <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                                    <i class="fa-solid fa-store text-base"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-bold text-sm text-white">Preguntas Comerciales</h4>
+                                                    <span class="text-[10px] text-slate-400 font-mono">Sponsors, marcas & menús</span>
+                                                </div>
+                                            </div>
+                                            <span id="badge-pct-comercial" class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">0%</span>
+                                        </div>
+
+                                        <div class="flex items-baseline gap-2 mb-2">
+                                            <span class="text-3xl font-black text-emerald-400 font-mono" id="count-comercial">0</span>
+                                            <span class="text-xs text-slate-400">interacciones</span>
+                                        </div>
+
+                                        <!-- Barra de Progreso -->
+                                        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-3">
+                                            <div id="bar-comercial" class="bg-emerald-400 h-full w-[0%] transition-all duration-500"></div>
+                                        </div>
+
+                                        <!-- Subcategorías -->
+                                        <div class="space-y-1.5 text-xs text-slate-300 divide-y divide-slate-800/40 pt-1">
+                                            <div class="flex justify-between items-center py-1">
+                                                <span class="flex items-center gap-1.5">
+                                                    <i class="fa-solid fa-award text-[10px] text-emerald-400/80"></i> Patrocinadores
+                                                </span>
+                                                <span class="font-mono font-bold text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-800" id="sub-comercial-sponsors">0</span>
+                                            </div>
+                                            <div class="flex justify-between items-center py-1">
+                                                <span class="flex items-center gap-1.5">
+                                                    <i class="fa-solid fa-utensils text-[10px] text-emerald-400/80"></i> Restaurantes & Comida
+                                                </span>
+                                                <span class="font-mono font-bold text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-800" id="sub-comercial-gastro">0</span>
+                                            </div>
+                                            <div class="flex justify-between items-center py-1">
+                                                <span class="flex items-center gap-1.5">
+                                                    <i class="fa-solid fa-ticket text-[10px] text-emerald-400/80"></i> Descuentos & QRs
+                                                </span>
+                                                <span class="font-mono font-bold text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-800" id="sub-comercial-promo">0</span>
+                                            </div>
+                                            <div class="flex justify-between items-center py-1">
+                                                <span class="flex items-center gap-1.5">
+                                                    <i class="fa-solid fa-bag-shopping text-[10px] text-emerald-400/80"></i> Comercio Local
+                                                </span>
+                                                <span class="font-mono font-bold text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-800" id="sub-comercial-shopping">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button onclick="filtrarPorCategoriaYVer('comercial')" class="mt-3.5 w-full py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="fa-solid fa-eye text-[11px]"></i> Explorar Comerciales
+                                    </button>
+                                </div>
+
+                                <!-- SECCIÓN 3: PREGUNTAS INFORMATIVAS -->
+                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 hover:border-cyan-500/50 transition-all card-glow flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center gap-2.5">
+                                                <div class="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+                                                    <i class="fa-solid fa-circle-info text-base"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-bold text-sm text-white">Preguntas Informativas</h4>
+                                                    <span class="text-[10px] text-slate-400 font-mono">Vuelos, logística & sedes</span>
+                                                </div>
+                                            </div>
+                                            <span id="badge-pct-informativa" class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">0%</span>
+                                        </div>
+
+                                        <div class="flex items-baseline gap-2 mb-2">
+                                            <span class="text-3xl font-black text-cyan-400 font-mono" id="count-informativa">0</span>
+                                            <span class="text-xs text-slate-400">interacciones</span>
+                                        </div>
+
+                                        <!-- Barra de Progreso -->
+                                        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-3">
+                                            <div id="bar-informativa" class="bg-cyan-400 h-full w-[0%] transition-all duration-500"></div>
+                                        </div>
+
+                                        <!-- Subcategorías -->
+                                        <div class="space-y-1.5 text-xs text-slate-300 divide-y divide-slate-800/40 pt-1">
+                                            <div class="flex justify-between items-center py-1">
+                                                <span class="flex items-center gap-1.5">
+                                                    <i class="fa-solid fa-plane-departure text-[10px] text-cyan-400/80"></i> Vuelos & Aeropuertos
+                                                </span>
+                                                <span class="font-mono font-bold text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-800" id="sub-info-flights">0</span>
+                                            </div>
+                                            <div class="flex justify-between items-center py-1">
+                                                <span class="flex items-center gap-1.5">
+                                                    <i class="fa-solid fa-taxi text-[10px] text-cyan-400/80"></i> Transporte & Movilidad
+                                                </span>
+                                                <span class="font-mono font-bold text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-800" id="sub-info-transport">0</span>
+                                            </div>
+                                            <div class="flex justify-between items-center py-1">
+                                                <span class="flex items-center gap-1.5">
+                                                    <i class="fa-solid fa-building text-[10px] text-cyan-400/80"></i> Centro de Convenciones
+                                                </span>
+                                                <span class="font-mono font-bold text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-800" id="sub-info-venue">0</span>
+                                            </div>
+                                            <div class="flex justify-between items-center py-1">
+                                                <span class="flex items-center gap-1.5">
+                                                    <i class="fa-solid fa-location-dot text-[10px] text-cyan-400/80"></i> Servicios & Estadía
+                                                </span>
+                                                <span class="font-mono font-bold text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-800" id="sub-info-services">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button onclick="filtrarPorCategoriaYVer('informativa')" class="mt-3.5 w-full py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="fa-solid fa-eye text-[11px]"></i> Explorar Informativas
+                                    </button>
+                                </div>
+
+                                <!-- SECCIÓN 4: ASISTENCIA TÉCNICA & WRO -->
+                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 hover:border-purple-500/50 transition-all card-glow flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center gap-2.5">
+                                                <div class="w-9 h-9 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                                                    <i class="fa-solid fa-microchip text-base"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-bold text-sm text-white">WRO & Asistencia IA</h4>
+                                                    <span class="text-[10px] text-slate-400 font-mono">Reglas, hardware & charla</span>
+                                                </div>
+                                            </div>
+                                            <span id="badge-pct-asistencia" class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">0%</span>
+                                        </div>
+
+                                        <div class="flex items-baseline gap-2 mb-2">
+                                            <span class="text-3xl font-black text-purple-400 font-mono" id="count-asistencia">0</span>
+                                            <span class="text-xs text-slate-400">interacciones</span>
+                                        </div>
+
+                                        <!-- Barra de Progreso -->
+                                        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-3">
+                                            <div id="bar-asistencia" class="bg-purple-400 h-full w-[0%] transition-all duration-500"></div>
+                                        </div>
+
+                                        <!-- Subcategorías -->
+                                        <div class="space-y-1.5 text-xs text-slate-300 divide-y divide-slate-800/40 pt-1">
+                                            <div class="flex justify-between items-center py-1">
+                                                <span class="flex items-center gap-1.5">
+                                                    <i class="fa-solid fa-trophy text-[10px] text-purple-400/80"></i> WRO 2026 Innovators
+                                                </span>
+                                                <span class="font-mono font-bold text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-800" id="sub-asistencia-wro">0</span>
+                                            </div>
+                                            <div class="flex justify-between items-center py-1">
+                                                <span class="flex items-center gap-1.5">
+                                                    <i class="fa-solid fa-brain text-[10px] text-purple-400/80"></i> Capacidades & IA Orbit
+                                                </span>
+                                                <span class="font-mono font-bold text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-800" id="sub-asistencia-ai">0</span>
+                                            </div>
+                                            <div class="flex justify-between items-center py-1">
+                                                <span class="flex items-center gap-1.5">
+                                                    <i class="fa-solid fa-gear text-[10px] text-purple-400/80"></i> Hardware & Sensores
+                                                </span>
+                                                <span class="font-mono font-bold text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-800" id="sub-asistencia-hardware">0</span>
+                                            </div>
+                                            <div class="flex justify-between items-center py-1">
+                                                <span class="flex items-center gap-1.5">
+                                                    <i class="fa-solid fa-comments text-[10px] text-purple-400/80"></i> Saludos & Charla Casual
+                                                </span>
+                                                <span class="font-mono font-bold text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-800" id="sub-asistencia-saludos">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button onclick="filtrarPorCategoriaYVer('asistencia')" class="mt-3.5 w-full py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="fa-solid fa-eye text-[11px]"></i> Explorar WRO & IA
+                                    </button>
+                                </div>
+
+                            </div>
+
+                            <!-- GRÁFICA & FEED PREVIO EN TIEMPO REAL -->
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-2">
+                                
+                                <!-- Gráfica Doughnut de Distribución -->
+                                <div class="lg:col-span-5 bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+                                    <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
+                                        <h4 class="font-bold text-sm text-white flex items-center gap-2">
+                                            <i class="fa-solid fa-chart-donut text-theme"></i> Proporción de Consultas
+                                        </h4>
+                                        <span class="text-xs font-mono text-slate-400" id="chart-total-label">0 Total</span>
+                                    </div>
+                                    <div class="relative flex-grow flex items-center justify-center min-h-[260px]">
+                                        <canvas id="chart-analytics"></canvas>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-slate-800/80 text-[11px] font-mono">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+                                            <span class="text-slate-300">Culturales</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+                                            <span class="text-slate-300">Comerciales</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-3 h-3 rounded-full bg-cyan-400"></span>
+                                            <span class="text-slate-300">Informativas</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-3 h-3 rounded-full bg-purple-400"></span>
+                                            <span class="text-slate-300">WRO / Asistencia</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Lista de Últimas Consultas con Filtros Rápidos -->
+                                <div class="lg:col-span-7 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden flex flex-col min-h-[380px]">
+                                    <div class="bg-slate-900/80 p-3.5 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-bold text-sm text-white">Últimas Interacciones Reales</span>
+                                            <span class="text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> En Vivo
+                                            </span>
+                                        </div>
+                                        
+                                        <!-- Filtro Rápido de Categorías en el Feed Previo -->
+                                        <div class="flex items-center gap-1 text-[11px] font-mono flex-wrap" id="quick-filter-chips">
+                                            <button onclick="cambiarFiltroRapido('todos')" class="quick-chip px-2.5 py-1 rounded bg-theme text-slate-950 font-bold transition-colors">Todas</button>
+                                            <button onclick="cambiarFiltroRapido('cultural')" class="quick-chip px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:text-white transition-colors">Cultural</button>
+                                            <button onclick="cambiarFiltroRapido('comercial')" class="quick-chip px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:text-white transition-colors">Comercial</button>
+                                            <button onclick="cambiarFiltroRapido('informativa')" class="quick-chip px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:text-white transition-colors">Informativa</button>
+                                            <button onclick="cambiarFiltroRapido('asistencia')" class="quick-chip px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:text-white transition-colors">WRO/IA</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Lista Scrollable -->
+                                    <div class="overflow-y-auto flex-grow p-0 max-h-[350px]">
+                                        <ul id="queries-list" class="divide-y divide-slate-800/60 text-sm">
+                                            <!-- Insertado por JS -->
+                                        </ul>
+                                    </div>
+
+                                    <!-- Botón Inferior para Abrir Historial Completo -->
+                                    <div class="p-3 bg-slate-900/60 border-t border-slate-800 text-center">
+                                        <button onclick="abrirHistorialModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-lg text-xs border border-slate-700 transition-colors flex items-center justify-center gap-2">
+                                            <i class="fa-solid fa-list-check text-theme"></i>
+                                            <span>Abrir Panel de Historial Completo &bull; <span id="preview-total-count">0</span> Interacciones</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MÓDULO 4: SATISFACCIÓN Y CALIFICACIÓN (CSAT) (INTACTO) -->
+                <div class="glass-panel border-l-4 border-theme overflow-hidden">
+                    <button class="accordion-button w-full px-6 py-4 flex items-center justify-between hover:bg-slate-800/50 transition-colors focus:outline-none" aria-expanded="false" onclick="toggleAccordion(this)">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-star text-xl text-theme"></i>
+                            <span class="font-bold text-lg text-white">Módulo 4: Satisfacción y Calificación (CSAT)</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down accordion-icon text-slate-400"></i>
+                    </button>
+                    <div class="accordion-content px-6">
+                        <div class="pt-4 pb-2 flex flex-col md:flex-row items-center justify-around gap-8">
+                            <div class="text-center">
+                                <p class="text-slate-400 text-sm uppercase tracking-wider mb-2 font-mono">Promedio de Calificación</p>
+                                <div class="flex items-baseline justify-center gap-2">
+                                    <span class="text-5xl font-black text-theme" id="csat-score">0.0</span>
+                                    <span class="text-xl text-slate-500 font-mono">/ 5.0</span>
+                                </div>
+                                <div class="flex gap-1 text-theme mt-3 text-lg justify-center">
+                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+                                </div>
+                            </div>
+                            <div class="w-full md:w-1/2 bg-slate-950 p-5 rounded-lg border border-slate-800">
+                                <h4 class="font-bold text-sm mb-4 border-b border-slate-800 pb-2 text-white">Distribución de Votos</h4>
+                                <div class="space-y-3 text-xs">
+                                    <div class="flex items-center gap-3"><span class="w-16 text-slate-400">5 Estrellas</span><div class="flex-grow bg-slate-800 h-2 rounded overflow-hidden"><div class="bg-theme h-full w-[85%]"></div></div><span class="font-mono text-slate-300">85%</span></div>
+                                    <div class="flex items-center gap-3"><span class="w-16 text-slate-400">4 Estrellas</span><div class="flex-grow bg-slate-800 h-2 rounded overflow-hidden"><div class="bg-theme h-full w-[10%]"></div></div><span class="font-mono text-slate-300">10%</span></div>
+                                    <div class="flex items-center gap-3"><span class="w-16 text-slate-400">3 Estrellas</span><div class="flex-grow bg-slate-800 h-2 rounded overflow-hidden"><div class="bg-theme h-full opacity-50 w-[3%]"></div></div><span class="font-mono text-slate-300">3%</span></div>
+                                    <div class="flex items-center gap-3"><span class="w-16 text-slate-400">2 Estrellas</span><div class="flex-grow bg-slate-800 h-2 rounded overflow-hidden"><div class="bg-slate-500 h-full w-[1%]"></div></div><span class="font-mono text-slate-300">1%</span></div>
+                                    <div class="flex items-center gap-3"><span class="w-16 text-slate-400">1 Estrella</span><div class="flex-grow bg-slate-800 h-2 rounded overflow-hidden"><div class="bg-slate-500 h-full w-[1%]"></div></div><span class="font-mono text-slate-300">1%</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 4. MODAL FLOTANTE: HISTORIAL COMPLETO DE INTERACCIONES CONVERSACIONALES -->
+    <div id="modalHistorialCompleto" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden">
+        <div class="glass-panel bg-slate-950 border border-slate-800 w-full max-w-6xl h-[95vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+            
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/80 flex-shrink-0">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-10 h-10 rounded-xl bg-theme-soft text-theme flex items-center justify-center text-xl border border-theme shadow-md">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-black text-lg text-white tracking-wide">Registro de Interacciones Conversacionales</h3>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> EN VIVO
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-400 font-mono">Telemetría de consultas en tiempo real por el jurado y público WRO 2026</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2.5">
+                    <button onclick="abrirModalQR()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 flex items-center gap-1.5 transition-colors">
+                        <i class="fa-solid fa-qrcode text-theme"></i>
+                        <span>QR Móvil</span>
+                    </button>
+                    <button onclick="cerrarHistorialModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Resumen de Métricas dentro del Modal -->
+            <div class="px-6 py-3 border-b border-slate-800 bg-slate-950/90 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs flex-shrink-0 font-mono">
+                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                    <span class="text-slate-400 text-[10px] uppercase block">Total Consultas</span>
+                    <span class="text-xl font-bold text-white" id="modal-kpi-total">0</span>
+                </div>
+                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                    <span class="text-slate-400 text-[10px] uppercase block">Latencia Media</span>
+                    <span class="text-xl font-bold text-sky-400" id="modal-kpi-latencia">-- ms</span>
+                </div>
+                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                    <span class="text-slate-400 text-[10px] uppercase block">Bilingüe (ES / EN)</span>
+                    <span class="text-base font-bold text-emerald-400 truncate block mt-0.5" id="modal-kpi-idiomas">--</span>
+                </div>
+                <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                    <span class="text-slate-400 text-[10px] uppercase block">Categoría Principal</span>
+                    <span class="text-base font-bold text-amber-400 truncate block mt-0.5" id="modal-kpi-top">Cultural</span>
+                </div>
+            </div>
+
+            <!-- Barra de Filtros & Búsqueda -->
+            <div class="p-4 border-b border-slate-800 bg-slate-900/50 flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
+                
+                <!-- Buscador de Texto -->
+                <div class="relative flex-1 min-w-[240px]">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                    <input type="text" id="modal-buscador" oninput="filtrarModalConversaciones()" placeholder="Buscar en preguntas, respuestas, temas..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-theme transition-colors">
+                </div>
+
+                <!-- Filtros de Categoría -->
+                <div class="flex items-center gap-1.5 text-xs flex-wrap" id="modal-cat-tabs">
+                    <button onclick="cambiarFiltroModal('categoria', 'todos')" class="modal-cat-btn px-3 py-1.5 rounded-lg font-bold bg-theme text-slate-950 transition-colors">Todas</button>
+                    <button onclick="cambiarFiltroModal('categoria', 'cultural')" class="modal-cat-btn px-3 py-1.5 rounded-lg font-medium bg-slate-900 text-slate-300 hover:text-white border border-slate-800 transition-colors">🎭 Culturales</button>
+                    <button onclick="cambiarFiltroModal('categoria', 'comercial')" class="modal-cat-btn px-3 py-1.5 rounded-lg font-medium bg-slate-900 text-slate-300 hover:text-white border border-slate-800 transition-colors">💼 Comerciales</button>
+                    <button onclick="cambiarFiltroModal('categoria', 'informativa')" class="modal-cat-btn px-3 py-1.5 rounded-lg font-medium bg-slate-900 text-slate-300 hover:text-white border border-slate-800 transition-colors">ℹ️ Informativas</button>
+                    <button onclick="cambiarFiltroModal('categoria', 'asistencia')" class="modal-cat-btn px-3 py-1.5 rounded-lg font-medium bg-slate-900 text-slate-300 hover:text-white border border-slate-800 transition-colors">🤖 WRO / Asistencia</button>
+                </div>
+
+                <!-- Filtros de Idioma -->
+                <div class="flex items-center gap-1 text-xs border-l border-slate-800 pl-3">
+                    <button onclick="cambiarFiltroModal('idioma', 'todos')" class="modal-lang-btn px-2.5 py-1.5 rounded-lg font-bold bg-slate-800 text-white transition-colors">ALL</button>
+                    <button onclick="cambiarFiltroModal('idioma', 'es')" class="modal-lang-btn px-2.5 py-1.5 rounded-lg font-medium bg-slate-900 text-slate-400 hover:text-white transition-colors">ES</button>
+                    <button onclick="cambiarFiltroModal('idioma', 'en')" class="modal-lang-btn px-2.5 py-1.5 rounded-lg font-medium bg-slate-900 text-slate-400 hover:text-white transition-colors">EN</button>
+                </div>
+
+            </div>
+
+            <!-- Feed Scrollable de Conversaciones -->
+            <div class="flex-grow overflow-y-auto p-4 sm:p-6 space-y-3.5 bg-slate-950/60" id="modal-feed-conversaciones">
+                <div class="text-center py-16 text-slate-400 font-mono text-xs">
+                    <i class="fa-solid fa-spinner fa-spin text-2xl text-theme mb-3"></i>
+                    <p>Cargando interacciones desde Supabase...</p>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-3 border-t border-slate-800 bg-slate-900/80 flex items-center justify-between text-xs text-slate-400 flex-shrink-0 font-mono">
+                <span id="modal-count-indicator">Mostrando 0 de 0 interacciones</span>
+                <button onclick="cerrarHistorialModal()" class="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors font-sans font-medium">Cerrar</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 5. MODAL QR (URL PÚBLICA DE PRODUCCIÓN PARA ACCESO MÓVIL) -->
+
+    <!-- MODAL DE VISUALIZACIÓN Y SIMULACIÓN DE CÓDIGO QR DE PATROCINANTE -->
+    <div id="modalSponsorQR" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="glass-panel bg-[#0d1117] rounded-2xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl border border-slate-700">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+                <div class="text-left flex items-center gap-2">
+                    <span id="sponsor-modal-flag" class="text-sm px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-slate-200"></span>
+                    <div>
+                        <h3 id="sponsor-modal-title" class="font-bold text-base text-white"></h3>
+                        <p id="sponsor-modal-cat" class="text-[11px] text-slate-400 font-mono"></p>
+                    </div>
+                </div>
+                <button onclick="cerrarModalSponsorQR()" class="text-slate-400 hover:text-white text-base p-1.5 rounded-lg hover:bg-slate-800 transition-colors">✕</button>
+            </div>
+            
+            <div class="p-3 bg-white rounded-2xl inline-block mx-auto shadow-2xl border-4 border-slate-700/60">
+                <img id="sponsor-modal-img" src="" alt="Código QR" class="w-64 h-64 object-contain rounded-lg" />
+            </div>
+
+            <div class="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800 text-left space-y-1.5 text-xs">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Beneficio:</span>
+                    <span id="sponsor-modal-promo" class="text-emerald-400 font-bold font-mono"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Enlace Público:</span>
+                    <a id="sponsor-modal-link" href="#" target="_blank" class="text-sky-400 hover:underline font-mono truncate max-w-[220px]"></a>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Escaneos Registrados:</span>
+                    <span id="sponsor-modal-count" class="text-white font-bold font-mono text-sm"></span>
+                </div>
+            </div>
+
+            <div class="flex gap-2 pt-1">
+                <button id="sponsor-simular-btn" onclick="simularEscaneoActual()" class="flex-1 py-2.5 rounded-lg bg-theme text-slate-950 hover:opacity-90 font-bold text-xs transition-opacity flex items-center justify-center gap-2 shadow-lg">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Simular Escaneo (+1)</span>
+                </button>
+                <button onclick="cerrarModalSponsorQR()" class="py-2.5 px-4 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs transition-colors">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalQR" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="glass-panel bg-[#0f121a] rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-slate-800">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+                <h3 class="font-bold text-sm text-white uppercase tracking-wider font-mono">Acceso Móvil al Feed</h3>
+                <button onclick="cerrarModalQR()" class="text-slate-400 hover:text-white text-sm p-1">✕</button>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+                Escanea este código con cualquier teléfono móvil para abrir el registro en vivo sin necesidad de iniciar sesión:
+            </p>
+            
+            <div id="qrcode" class="p-3 bg-white rounded-xl inline-block mx-auto shadow-lg"></div>
+            
+            <div class="text-xs font-mono text-emerald-400 bg-slate-950 py-2 px-3 rounded border border-slate-800 truncate" id="urlActualTexto">
+                https://wro-2026-web.vercel.app
+            </div>
+
+            <button onclick="cerrarModalQR()" class="w-full py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs transition-colors">
+                Cerrar
+            </button>
+        </div>
+    </div>
+
+    <!-- PIE DE PÁGINA -->
+    <footer class="border-t border-slate-800/80 py-6 px-4 text-center text-xs text-slate-500 font-mono mt-auto">
+        <p>ORBIT &bull; World Robot Olympiad 2026 &bull; Golden Codex Robotics &bull; AI Powered Assistant</p>
+    </footer>
+
+    <!-- LOGICA UNIFICADA: TELEMETRÍA, SUPABASE & ANALÍTICA DE 4 SECCIONES -->
+    <script>
+        // Configuración Oficial de Supabase (Cloud & Docker Local)
+        const SUPABASE_CLOUD_URL = 'https://ieuxpahhgwfyyqipqfqn.supabase.co';
+        const SUPABASE_CLOUD_KEY = 'sb_publishable_5IjIAcDg3YiS9ClKHFgL8w_ViDIB1Wi';
+        
+        // Llave JWT Oficial de Supabase Docker Local (Service Role con acceso total offline)
+        const SUPABASE_DOCKER_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3OTQyMzk5MzYsImV4cCI6MTk1MTkxOTkzNn0.c283nNqrPzleUY2-wycafDpc9scCyUH4OkmxAT-Mqfs';
+
+        // Candidatos locales de Supabase Docker (Soporta puerto 8000 oficial en Raspberry Pi y puerto 54321)
+        const LOCAL_DOCKER_ENDPOINTS = [
+            'http://192.168.5.101:8000',
+            'http://192.168.5.68:8000',
+            'http://127.0.0.1:8000',
+            'http://localhost:8000',
+            `http://${window.location.hostname || '127.0.0.1'}:8000`,
+            `http://${window.location.hostname || '127.0.0.1'}:54321`,
+            'http://127.0.0.1:54321',
+            'http://localhost:54321'
+        ];
+        let localDockerEndpointActivo = null;
+        const PRODUCCION_URL = 'https://wro-2026-web.vercel.app';
+
+        let supabaseClient = null;
+        let conversacionesData = [];
+        let activeChart = null;
+
+        // Detector automático de Supabase Docker Local
+        async function detectarDockerSupabase() {
+            if (localDockerEndpointActivo) return localDockerEndpointActivo;
+            for (const ep of LOCAL_DOCKER_ENDPOINTS) {
+                // Probar system_control primero (telemetría local con JWT de docker)
+                try {
+                    const ctrl = new AbortController();
+                    const timer = setTimeout(() => ctrl.abort(), 700);
+                    const res = await fetch(`${ep}/rest/v1/system_control?select=id&limit=1`, {
+                        method: 'GET',
+                        headers: { 'apikey': SUPABASE_DOCKER_KEY, 'Authorization': `Bearer ${SUPABASE_DOCKER_KEY}` },
+                        signal: ctrl.signal
+                    });
+                    clearTimeout(timer);
+                    if (res.ok || res.status === 200 || res.status === 206) {
+                        localDockerEndpointActivo = ep;
+                        console.log(`🐳 [Docker Local Detectado en system_control]: ${ep}`);
+                        return ep;
+                    }
+                } catch(e) {}
+
+                // Probar qr_mostrados como alternativa
+                try {
+                    const ctrl = new AbortController();
+                    const timer = setTimeout(() => ctrl.abort(), 700);
+                    const res = await fetch(`${ep}/rest/v1/qr_mostrados?select=id&limit=1`, {
+                        method: 'GET',
+                        headers: { 'apikey': SUPABASE_DOCKER_KEY, 'Authorization': `Bearer ${SUPABASE_DOCKER_KEY}` },
+                        signal: ctrl.signal
+                    });
+                    clearTimeout(timer);
+                    if (res.ok || res.status === 200 || res.status === 206) {
+                        localDockerEndpointActivo = ep;
+                        console.log(`🐳 [Docker Local Detectado en qr_mostrados]: ${ep}`);
+                        return ep;
+                    }
+                } catch(e) {}
+            }
+            return null;
+        }
+
+        // Estado en tiempo real de exhibiciones QR (Patrocinantes B2B)
+        let qrStatsData = {
+            total: 16,
+            por_sponsor: {
+                deleite: 6,
+                casita_blanca: 4,
+                chocobar: 1,
+                hacienda: 1,
+                toroverde: 1,
+                paramo: 1,
+                cacao: 1,
+                canaima: 1
+            },
+            ultimo: { sponsor_id: 'casita_blanca', hora: '13:32:00' }
+        };
+
+        function normalizarSponsorId(raw) {
+            const s = (raw || '').toLowerCase().trim();
+            if (s.includes('deleite')) return 'deleite';
+            if (s.includes('casita')) return 'casita_blanca';
+            if (s.includes('choco') || s.includes('cortes')) return 'chocobar';
+            if (s.includes('hacienda') || s.includes('munoz')) return 'hacienda';
+            if (s.includes('toro') || s.includes('verde')) return 'toroverde';
+            if (s.includes('paramo')) return 'paramo';
+            if (s.includes('cacao') || s.includes('kakao') || s.includes('origen')) return 'cacao';
+            if (s.includes('canaima')) return 'canaima';
+            return s;
+        }
+
+        // Filtros del Modal
+        let modalFiltroCategoria = 'todos';
+        let modalFiltroIdioma = 'todos';
+        let modalBusquedaTexto = '';
+
+        // Definición de las 4 Secciones
+        const CATEGORIAS_CONFIG = {
+            cultural: {
+                name: 'Preguntas Culturales',
+                color: '#F59E0B',
+                badgeClass: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+                icon: 'fa-earth-americas'
+            },
+            comercial: {
+                name: 'Preguntas Comerciales',
+                color: '#10B981',
+                badgeClass: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+                icon: 'fa-store'
+            },
+            informativa: {
+                name: 'Preguntas Informativas',
+                color: '#06B6D4',
+                badgeClass: 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20',
+                icon: 'fa-circle-info'
+            },
+            asistencia: {
+                name: 'WRO & Asistencia IA',
+                color: '#8B5CF6',
+                badgeClass: 'bg-purple-500/10 text-purple-400 border border-purple-500/20',
+                icon: 'fa-microchip'
+            }
+        };
+
+        // Datos Globales de Telemetría y Robot Orbit 1
+        let globalData = {
+            "global": {
+                "bateria_promedio": 85,
+                "robots_activos": 1,
+                "total_qrs": 16,
+                "total_robots": 1
+            },
+            "robots": {
+                "orbit_1": { "bateria": 85, "baterias": [88, 84, 83], "csat": 4.8, "color": "#10B981", "estado": "Activo", "nombre": "Orbit 1 - Puerto Rico", "qrs": 0 }
+            },
+            "patrocinadores": {
+                "orbit_1": [
+                    { "activo": true, "id": "casita_blanca", "nombre": "La Casita Blanca (Santurce, PR)", "vistas": 4, "promo": "Piña Colada Gratis", "pais": "🇵🇷 PR", "cat": "Gastronomía Criolla", "color": "text-cyan-400", "qr_file": "media/qr_casita_blanca.png", "url": "https://qr-orbitwro.vercel.app/casita-blanca" },
+                    { "activo": true, "id": "chocobar", "nombre": "Chocobar Cortés (San Juan, PR)", "vistas": 1, "promo": "Churros Gratis", "pais": "🇵🇷 PR", "cat": "Chocolatería Artesanal", "color": "text-amber-500", "qr_file": "media/qr_chocobar_cortes.png", "url": "https://qr-orbitwro.vercel.app/chocobar" },
+                    { "activo": true, "id": "hacienda", "nombre": "Hacienda Muñoz (San Lorenzo, PR)", "vistas": 1, "promo": "Tour 2x1 & Café", "pais": "🇵🇷 PR", "cat": "Ecoturismo & Café", "color": "text-emerald-400", "qr_file": "media/qr_hacienda_munoz.png", "url": "https://qr-orbitwro.vercel.app/hacienda" },
+                    { "activo": true, "id": "toroverde", "nombre": "ToroVerde Adventure Park (Orocovis, PR)", "vistas": 1, "promo": "Pase Aventura 2x1", "pais": "🇵🇷 PR", "cat": "Aventura Extrema", "color": "text-green-400", "qr_file": "media/qr_toroverde.png", "url": "https://qr-orbitwro.vercel.app/toroverde" },
+                    { "activo": true, "id": "deleite", "nombre": "Deleite Automercado (Lechería, VZ)", "vistas": 6, "promo": "5% OFF Mercado", "pais": "🇻🇪 VZ", "cat": "Automercado & Víveres", "color": "text-purple-400", "qr_file": "media/qr_deleite.png", "url": "https://qr-orbitwro.vercel.app/deleite" },
+                    { "activo": true, "id": "paramo", "nombre": "Páramo Café (Caracas, VZ)", "vistas": 1, "promo": "Mokaccino Gratis", "pais": "🇻🇪 VZ", "cat": "Cafetería de Especialidad", "color": "text-teal-400", "qr_file": "media/qr_paramo_cafe.png", "url": "https://qr-orbitwro.vercel.app/paramo" },
+                    { "activo": true, "id": "cacao", "nombre": "Cacao de Origen (Caracas, VZ)", "vistas": 1, "promo": "Cata Guiada Gratis", "pais": "🇻🇪 VZ", "cat": "Cacao Criollo Fino", "color": "text-orange-400", "qr_file": "media/qr_cacao_de_origen.png", "url": "https://qr-orbitwro.vercel.app/cacao" },
+                    { "activo": true, "id": "canaima", "nombre": "Campamento Canaima (Canaima, VZ)", "vistas": 1, "promo": "Salto Ángel 2x1", "pais": "🇻🇪 VZ", "cat": "Expedición Salto Ángel", "color": "text-sky-400", "qr_file": "media/qr_canaima.png", "url": "https://qr-orbitwro.vercel.app/canaima" },
+                    { "activo": true, "id": "source_code", "nombre": "Orbit Source Code & Web Platform", "vistas": 12, "promo": "Explorador Web y Arquitectura", "pais": "🌐 Global", "cat": "Código Abierto & AI", "color": "text-cyan-400", "qr_file": "media/qr_source_code.png", "url": "https://orbit-rho-blush-62.vercel.app/source" }
+                ]
+            }
+        };
+
+        // =========================================================================
+        // MOTOR DE CLASIFICACIÓN INTELIGENTE (4 CATEGORÍAS + SUBCATEGORÍAS)
+        // =========================================================================
+        function clasificarInteraccion(item) {
+            const p = (item.pregunta || '').toLowerCase().trim();
+            const r = (item.respuesta || '').toLowerCase().trim();
+            const t = (item.tema || '').toLowerCase().trim();
+            const fullText = `${p} ${r} ${t}`;
+
+            const matchAny = (text, words) => {
+                return words.some(w => {
+                    if (w.includes(' ')) {
+                        return text.includes(w);
+                    }
+                    const regex = new RegExp(`\\b${w}\\b`, 'i');
+                    return regex.test(text);
+                });
+            };
+
+            // 1. PREGUNTAS CULTURALES (MÁXIMA PRIORIDAD — NÚCLEO DE ORBIT)
+            const cultPersonajes = [
+                'simón bolívar', 'simon bolivar', 'simón díaz', 'simon diaz', 'cabán vale', 'caban vale',
+                'tomioka', 'karina', 'kariña', 'cariña', 'indígena', 'indigena', 'indígenas', 'indigenas',
+                'prócer', 'procer', 'héroe', 'juan crisóstomo', 'falcon', 'personas famosas',
+                'quién es simón', 'quien es simon', 'tumbas de simón', 'restos de simón',
+                'francisco de miranda', 'sucre', 'andrés bello', 'andres bello'
+            ];
+            const cultPR = [
+                'puerto rico', 'san juan', 'el morro', 'boricua', 'borinquen', 'coquí', 'coqui',
+                'verde luz', 'viejo san juan', 'ciudad amurallada', 'santurce', 'bomba y plena',
+                'ponce', 'culebra', 'vieques', 'taíno', 'taino', 'taínos', 'tainos'
+            ];
+            const cultVZ = [
+                'venezuela', 'lecheria', 'lechería', 'anzoátegui', 'anzoategui', 'salto ángel', 'salto angel',
+                'canaima', 'caracas', 'llanos', 'morro', 'mochima', 'comida típica', 'comida tipica',
+                'arepa', 'arepas', 'pabellón criollo', 'pabellon criollo', 'hallaca', 'hallacas', 'cachapa', 'cachapas',
+                'cultura de venezuela', 'gastronomía tradicional', 'gastronomia tradicional',
+                'diablos danzantes', 'yare', 'joropo', 'margarita', 'playa colorada', 'cayo sombrero'
+            ];
+            const cultHistoria = [
+                'historia', 'tradición', 'tradicion', 'tradiciones', 'costumbres', 'música típica', 'musica tipica',
+                'baile típico', 'baile tipico', 'folclore', 'folklore', 'cuatro venezolano', 'maracas'
+            ];
+
+            if (matchAny(p, cultPersonajes) || matchAny(fullText, ['simón díaz', 'cabán vale', 'karina', 'kariña'])) {
+                return { categoria: 'cultural', subcategoria: 'Personajes & Figuras' };
+            }
+            if (matchAny(p, cultPR) && !matchAny(p, ['venezuela'])) {
+                return { categoria: 'cultural', subcategoria: 'Puerto Rico' };
+            }
+            if (matchAny(p, cultVZ) || matchAny(p, ['comida típica', 'cultura de venezuela', 'salto ángel', 'canaima', 'arepa'])) {
+                return { categoria: 'cultural', subcategoria: 'Venezuela' };
+            }
+            if (matchAny(p, cultHistoria)) {
+                return { categoria: 'cultural', subcategoria: 'Historia & Costumbres' };
+            }
+
+            // 2. COMERCIAL, NEGOCIOS Y PATROCINANTES (COMERCIAL)
+            const comSponsors = ['deleite', 'casita blanca', 'la casita blanca', 'patrocinador', 'patrocinante', 'patrocinadores', 'sponsor', 'sponsors', 'convenio', 'alianza'];
+            const comGastro = ['deleite', 'deleite market', 'automercado deleite', 'restaurante', 'restaurantes', 'menú', 'menu', 'hacer mercado', 'mercado en lecheria', 'mercado en lechería', 'dónde comer', 'donde comer', 'dónde puedo comer', 'donde puedo comer', 'dónde cenar', 'donde cenar'];
+            const comPromo = ['descuento', 'descuentos', 'código qr', 'codigo qr', 'promoción', 'promocion', 'cupón', 'cupon', 'oferta', 'escaneos qr', 'escaneo'];
+            const comShopping = ['dónde comprar', 'donde comprar', 'dónde puedo comprar', 'donde puedo comprar', 'hacer compras', 'tienda', 'tiendas', 'cabezudos artesanales', 'precio', 'cuánto cuesta rentar', 'cuanto me cuesta'];
+
+            if (matchAny(p, comSponsors) || (matchAny(fullText, comSponsors) && !matchAny(p, cultVZ))) return { categoria: 'comercial', subcategoria: 'Patrocinadores' };
+            if (matchAny(p, comGastro) || matchAny(p, ['deleite'])) return { categoria: 'comercial', subcategoria: 'Restaurantes & Comida' };
+            if (matchAny(p, comPromo) || (matchAny(p, ['sí', 'si', 'quiero']) && matchAny(r, ['código qr', 'descuento', 'promoción']))) return { categoria: 'comercial', subcategoria: 'Descuentos & QRs' };
+            if (matchAny(p, comShopping)) return { categoria: 'comercial', subcategoria: 'Comercio Local' };
+
+            // 3. LOGÍSTICA DE VUELOS, TRANSPORTE Y SEDES (INFORMATIVA)
+            const infoFlights = [
+                'vuelo', 'vuelos', 'aeropuerto', 'aeropuertos', 'aerolínea', 'aerolineas', 'aerolíneas',
+                'itinerario de vuelo', 'boleto de avión', 'pasaje de avión', 'hora de vuelo', 'horario de vuelo',
+                'retraso de vuelo', 'horas de vuelos', 'horas de vuelo', 'terminal aéreo', 'terminal aérea'
+            ];
+            const infoTransport = [
+                'cómo puedo llegar', 'como puedo llegar', 'cómo hago para llegar', 'como hago para llegar',
+                'cómo llegar', 'como llegar', 'cómo voy', 'como voy', 'transporte público', 'transporte publico',
+                'transporte terrestre', 'taxi', 'taxis', 'uber', 'ferry', 'ferris', 'autobús', 'autobus', 'autobuses'
+            ];
+            const infoVenue = [
+                'centro de convenciones', 'pabellón de exposiciones', 'sala de conferencias', 'salón de eventos',
+                'horario de apertura', 'agenda del evento', 'mapa del evento', 'stands de los países'
+            ];
+            const infoServices = [
+                'hotel', 'hoteles', 'dónde dormir', 'donde dormir', 'hospedaje', 'alojamiento',
+                'primeros auxilios', 'clima', 'temperatura', 'tarea de geografía', 'frontera con', 'fronteras con',
+                'septentrional', 'trinitario', 'dónde queda mar de la cruz', 'donde queda mar de la cruz'
+            ];
+
+            if (matchAny(p, infoFlights)) return { categoria: 'informativa', subcategoria: 'Vuelos & Aeropuertos' };
+            if (matchAny(p, infoTransport)) return { categoria: 'informativa', subcategoria: 'Transporte & Movilidad' };
+            if (matchAny(p, infoVenue)) return { categoria: 'informativa', subcategoria: 'Centro de Convenciones' };
+            if (matchAny(p, infoServices)) return { categoria: 'informativa', subcategoria: 'Servicios & Estadía' };
+
+            // 4. ASISTENCIA TÉCNICA & WRO (ASISTENCIA)
+            const wroComp = ['wro', 'olympiad', 'world robot', 'future innovators', 'competencia', 'jurado', 'jueces', 'evaluación', 'evaluacion', 'delegación'];
+            const techAi = ['gemini', 'elevenlabs', 'inteligencia artificial', 'modelo cognitivo', 'qué puedes hacer', 'que puedes hacer', 'cómo funcionas', 'como funcionas', 'answer me in english', 'en inglés', 'en ingles', 'cambiarle la voz'];
+            const techHw = ['cámara', 'camara', 'yunet', 'visión artificial', 'sensor', 'motores', 'megapi', 'raspberry', 'batería', 'bateria', 'ojos odio', 'reconoce por eso', 'hardware'];
+            const techTalk = ['hola', 'buenos días', 'buenas tardes', 'chao', 'adiós', 'adios', 'muchas gracias', 'gracias', 'quién eres', 'quien eres', 'cómo te llamas', 'como te llamas', 'cómo estás', 'como estas', 'amigo', 'amigos', 'tienes algún amigo', 'dónde vives tú', 'donde vives tu'];
+
+            if (matchAny(p, wroComp)) return { categoria: 'asistencia', subcategoria: 'WRO 2026 Innovators' };
+            if (matchAny(p, techAi)) return { categoria: 'asistencia', subcategoria: 'Capacidades & IA Orbit' };
+            if (matchAny(p, techHw)) return { categoria: 'asistencia', subcategoria: 'Hardware & Sensores' };
+            if (matchAny(p, techTalk) || p.split(' ').length <= 2) return { categoria: 'asistencia', subcategoria: 'Saludos & Charla Casual' };
+
+            return { categoria: 'cultural', subcategoria: 'Historia & Costumbres' };
+        }
+
+        function procesarInteraccion(raw) {
+            const clasif = clasificarInteraccion(raw);
+            return {
+                id: raw.id,
+                pregunta: raw.pregunta || '',
+                respuesta: raw.respuesta || '',
+                tema: raw.tema || 'general',
+                idioma: raw.idioma || 'es',
+                latencia_ms: raw.latencia_ms || 200,
+                fecha: raw.fecha || '',
+                hora: raw.hora || '',
+                reaccion: raw.reaccion || '',
+                categoria: clasif.categoria,
+                subcategoria: clasif.subcategoria
+            };
+        }
+
+        // =========================================================================
+        // CONEXIÓN ROBUSTA (DOCKER LOCAL PRIMERO EN RASPBERRY/LOCAL -> CLOUD -> OFFLINE REST/JSON)
+        // =========================================================================
+        async function conectarSupabase() {
+            let cargadas = [];
+            const esLocal = window.location.hostname !== 'wro-2026-web.vercel.app';
+
+            // 1. En entorno local / Raspberry Pi, intentar conectar primero a Supabase Docker
+            if (esLocal) {
+                const dockerEp = await detectarDockerSupabase();
+                if (dockerEp) {
+                    try {
+                        const ctrl = new AbortController();
+                        const timer = setTimeout(() => ctrl.abort(), 2000);
+                        const rConv = await fetch(`${dockerEp}/rest/v1/conversaciones?select=*&order=id.desc&limit=1000`, {
+                            headers: { 'apikey': SUPABASE_DOCKER_KEY, 'Authorization': `Bearer ${SUPABASE_DOCKER_KEY}` },
+                            signal: ctrl.signal
+                        });
+                        clearTimeout(timer);
+                        if (rConv.ok) {
+                            const dConv = await rConv.json();
+                            if (Array.isArray(dConv) && dConv.length > 0) {
+                                cargadas = dConv;
+                            }
+                        }
+                    } catch(eConv) {}
+
+                    if (window.supabase) {
+                        try {
+                            supabaseClient = window.supabase.createClient(dockerEp, SUPABASE_DOCKER_KEY);
+                            // Suscribir WebSockets para QRs en Docker Local
+                            supabaseClient
+                                .channel('realtime_qr_docker_stream')
+                                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'qr_mostrados' }, (payload) => {
+                                    console.log('🎟️ [Docker Realtime QR Event]:', payload.new);
+                                    const nuevo = payload.new;
+                                    const spKey = normalizarSponsorId(nuevo.sponsor_id);
+                                    qrStatsData.total += 1;
+                                    qrStatsData.por_sponsor[spKey] = (qrStatsData.por_sponsor[spKey] || 0) + 1;
+                                    qrStatsData.ultimo = {
+                                        sponsor_id: spKey,
+                                        hora: nuevo.shown_at ? new Date(nuevo.shown_at).toLocaleTimeString() : new Date().toLocaleTimeString()
+                                    };
+                                    renderizarValoresQR();
+                                })
+                                .subscribe();
+
+                            // Suscribir WebSockets para Conversaciones en Docker Local
+                            supabaseClient
+                                .channel('realtime_conversaciones_docker')
+                                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'conversaciones' }, (payload) => {
+                                    const nuevo = procesarInteraccion(payload.new);
+                                    conversacionesData.unshift(nuevo);
+                                    actualizarAnaliticaUI();
+                                    renderizarModalFeed();
+                                })
+                                .subscribe();
+
+                            // Suscribir WebSockets para Telemetría de Hardware (system_control) en Docker Local
+                            supabaseClient
+                                .channel('realtime_telemetria_docker')
+                                .on('postgres_changes', { event: '*', schema: 'public', table: 'system_control' }, (payload) => {
+                                    console.log('⚡ [Docker Realtime Telemetry Event]:', payload.new);
+                                    if (payload.new) {
+                                        actualizarTelemetriaUI(payload.new);
+                                    }
+                                })
+                                .subscribe();
+                        } catch(eClient) {}
+                    }
+
+                    console.log(`🐳 [Docker Local] Operativo en ${dockerEp}`);
+                    const hdrStatus = document.getElementById('header-status-indicator');
+                    if (hdrStatus) hdrStatus.innerText = '🐳 Supabase Docker: Conectado (Offline)';
+                }
+            }
+
+            // 2. Si no conectó Docker Local o estamos en la nube, probar Supabase Cloud
+            if (!supabaseClient && !localDockerEndpointActivo) {
+                try {
+                    if (window.supabase) {
+                        const tempClient = window.supabase.createClient(SUPABASE_CLOUD_URL, SUPABASE_CLOUD_KEY);
+                        const ctrl = new AbortController();
+                        const timer = setTimeout(() => ctrl.abort(), 2500);
+
+                        const { data, error } = await tempClient
+                            .from('conversaciones')
+                            .select('*')
+                            .order('id', { ascending: false })
+                            .limit(1000);
+
+                        clearTimeout(timer);
+
+                        if (!error && data && data.length > 0) {
+                            supabaseClient = tempClient;
+                            cargadas = data;
+                            console.log(`☁️ [Supabase Cloud] ${data.length} interacciones cargadas con éxito.`);
+                            const hdrStatus = document.getElementById('header-status-indicator');
+                            if (hdrStatus) hdrStatus.innerText = 'Supabase Cloud: Conectado';
+
+                            // Suscripciones WebSockets Cloud
+                            supabaseClient
+                                .channel('realtime_conversaciones_stream')
+                                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'conversaciones' }, (payload) => {
+                                    const nuevo = procesarInteraccion(payload.new);
+                                    conversacionesData.unshift(nuevo);
+                                    actualizarAnaliticaUI();
+                                    renderizarModalFeed();
+                                })
+                                .subscribe();
+
+                            supabaseClient
+                                .channel('realtime_qr_mostrados_stream')
+                                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'qr_mostrados' }, (payload) => {
+                                    const nuevo = payload.new;
+                                    const spKey = normalizarSponsorId(nuevo.sponsor_id);
+                                    qrStatsData.total += 1;
+                                    qrStatsData.por_sponsor[spKey] = (qrStatsData.por_sponsor[spKey] || 0) + 1;
+                                    qrStatsData.ultimo = {
+                                        sponsor_id: spKey,
+                                        hora: nuevo.shown_at ? new Date(nuevo.shown_at).toLocaleTimeString() : new Date().toLocaleTimeString()
+                                    };
+                                    renderizarValoresQR();
+                                })
+                                .subscribe();
+
+                            supabaseClient
+                                .channel('realtime_telemetria_cloud')
+                                .on('postgres_changes', { event: '*', schema: 'public', table: 'system_control' }, (payload) => {
+                                    console.log('⚡ [Cloud Realtime Telemetry Event]:', payload.new);
+                                    if (payload.new) {
+                                        actualizarTelemetriaUI(payload.new);
+                                    }
+                                })
+                                .subscribe();
+                        }
+                    }
+                } catch(errCloud) {
+                    console.warn('⚠️ Supabase Cloud fuera de línea o sin internet:', errCloud);
+                }
+            }
+
+            // 3. Fallback a la API de python (/api/historial) que lee el JSON local offline
+            if (cargadas.length === 0) {
+                try {
+                    const rHist = await fetch('/api/historial?limit=1000', { cache: 'no-cache' });
+                    if (rHist.ok) {
+                        const localItems = await rHist.json();
+                        if (Array.isArray(localItems) && localItems.length > 0) {
+                            cargadas = localItems;
+                            console.log(`📂 [Local File] ${localItems.length} conversaciones cargadas desde archivo JSON local.`);
+                            const hdrStatus = document.getElementById('header-status-indicator');
+                            if (hdrStatus && !hdrStatus.innerText.includes('Docker')) {
+                                hdrStatus.innerText = 'Modo Local Offline';
+                            }
+                        }
+                    }
+                } catch (eApi) {}
+            }
+
+            // Procesar y renderizar datos cargados
+            if (cargadas.length > 0) {
+                conversacionesData = cargadas.map(procesarInteraccion);
+            }
+
+            actualizarAnaliticaUI();
+            actualizarMetricasQR();
+        }
+
+        // =========================================================================
+        // GESTIÓN Y MÉTRICAS DE PATROCINADORES Y CÓDIGOS QR EN TIEMPO REAL
+        // =========================================================================
+        async function actualizarMetricasQR() {
+            let actualizado = false;
+
+            // 1. Consultar Supabase Docker Local (Directo por REST API offline)
+            const dockerEp = await detectarDockerSupabase();
+            if (dockerEp) {
+                try {
+                    const ctrl = new AbortController();
+                    const timer = setTimeout(() => ctrl.abort(), 1500);
+                    const resp = await fetch(`${dockerEp}/rest/v1/qr_mostrados?select=*&order=shown_at.desc`, {
+                        headers: { 'apikey': SUPABASE_DOCKER_KEY, 'Authorization': `Bearer ${SUPABASE_DOCKER_KEY}` },
+                        signal: ctrl.signal
+                    });
+                    clearTimeout(timer);
+                    if (resp.ok) {
+                        const rows = await resp.json();
+                        if (Array.isArray(rows) && rows.length > 0) {
+                            let conteos = {
+                                deleite: 0, casita_blanca: 0, chocobar: 0, hacienda: 0,
+                                toroverde: 0, paramo: 0, cacao: 0, canaima: 0
+                            };
+                            rows.forEach(r => {
+                                const sp = normalizarSponsorId(r.sponsor_id);
+                                conteos[sp] = (conteos[sp] || 0) + 1;
+                            });
+                            Object.keys(conteos).forEach(k => {
+                                qrStatsData.por_sponsor[k] = conteos[k];
+                            });
+                            qrStatsData.total = rows.length;
+                            if (rows[0]) {
+                                qrStatsData.ultimo = {
+                                    sponsor_id: normalizarSponsorId(rows[0].sponsor_id),
+                                    hora: rows[0].shown_at ? new Date(rows[0].shown_at).toLocaleTimeString() : new Date().toLocaleTimeString()
+                                };
+                            }
+                            actualizado = true;
+                        }
+                    }
+                } catch(eDocker) {}
+
+                // Vista de respaldo agregada (qr_mostrados_por_sponsor)
+                if (!actualizado) {
+                    try {
+                        const respV = await fetch(`${dockerEp}/rest/v1/qr_mostrados_por_sponsor?select=*`, {
+                            headers: { 'apikey': SUPABASE_DOCKER_KEY, 'Authorization': `Bearer ${SUPABASE_DOCKER_KEY}` }
+                        });
+                        if (respV.ok) {
+                            const vRows = await respV.json();
+                            if (Array.isArray(vRows) && vRows.length > 0) {
+                                let totalV = 0;
+                                vRows.forEach(r => {
+                                    const sp = normalizarSponsorId(r.sponsor_id);
+                                    const cnt = parseInt(r.total) || 0;
+                                    qrStatsData.por_sponsor[sp] = cnt;
+                                    totalV += cnt;
+                                });
+                                qrStatsData.total = totalV;
+                                actualizado = true;
+                            }
+                        }
+                    } catch(eV) {}
+                }
+            }
+
+            // 2. Si hay cliente Supabase Cloud / Local activo, consultar tabla
+            if (supabaseClient) {
+                try {
+                    const { data: rows, error: qErr } = await supabaseClient
+                        .from('qr_mostrados')
+                        .select('*')
+                        .order('shown_at', { ascending: false });
+
+                    if (!qErr && Array.isArray(rows) && rows.length > 0) {
+                        let conteos = {};
+                        rows.forEach(r => {
+                            const sp = normalizarSponsorId(r.sponsor_id);
+                            conteos[sp] = (conteos[sp] || 0) + 1;
+                        });
+                        Object.keys(conteos).forEach(k => {
+                            qrStatsData.por_sponsor[k] = Math.max(qrStatsData.por_sponsor[k] || 0, conteos[k]);
+                        });
+                        qrStatsData.total = Math.max(qrStatsData.total, rows.length);
+                        if (rows[0]) {
+                            qrStatsData.ultimo = {
+                                sponsor_id: normalizarSponsorId(rows[0].sponsor_id),
+                                hora: rows[0].shown_at ? new Date(rows[0].shown_at).toLocaleTimeString() : new Date().toLocaleTimeString()
+                            };
+                        }
+                        actualizado = true;
+                    }
+                } catch(eSb) {}
+            }
+
+            // 3. Consultar API local de Python (web_historial.py -> historial_qr.json)
+            try {
+                const resp = await fetch('/api/qr', { cache: 'no-cache' });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data && typeof data.total === 'number') {
+                        qrStatsData.total = Math.max(qrStatsData.total, data.total);
+                        if (data.por_sponsor) {
+                            Object.keys(data.por_sponsor).forEach(k => {
+                                const norm = normalizarSponsorId(k);
+                                qrStatsData.por_sponsor[norm] = Math.max(qrStatsData.por_sponsor[norm] || 0, data.por_sponsor[k]);
+                            });
+                        }
+                        if (data.ultimos && data.ultimos.length > 0) {
+                            qrStatsData.ultimo = data.ultimos[data.ultimos.length - 1];
+                        }
+                        actualizado = true;
+                    }
+                }
+            } catch (e) {}
+
+            renderizarValoresQR();
+        }
+
+        function renderizarValoresQR() {
+            const elTotalBox = document.getElementById('total-qr-displays');
+            const elTopQRs = document.getElementById('top-stat-qrs');
+            const elLastTime = document.getElementById('qr-last-time');
+
+            // Actualizar contadores dinámicos para cada sponsor
+            Object.keys(qrStatsData.por_sponsor).forEach(spKey => {
+                const el = document.getElementById('qr-count-' + spKey);
+                if (el) {
+                    const prev = parseInt(el.innerText || '0');
+                    const curr = qrStatsData.por_sponsor[spKey] || 0;
+                    el.innerText = curr;
+                    if (curr > prev && prev > 0) {
+                        el.parentElement.classList.add('bg-emerald-500/40', 'scale-110');
+                        setTimeout(() => {
+                            el.parentElement.classList.remove('bg-emerald-500/40', 'scale-110');
+                        }, 1500);
+                    }
+                }
+            });
+
+            // Actualizar totales y último QR mostrado
+            let sumTotal = Object.values(qrStatsData.por_sponsor).reduce((a, b) => a + b, 0);
+            const totalMostrados = Math.max(qrStatsData.total, sumTotal);
+            qrStatsData.total = totalMostrados;
+
+            if (elTotalBox) elTotalBox.innerText = totalMostrados;
+            if (elTopQRs) elTopQRs.innerText = totalMostrados;
+            if (elLastTime && qrStatsData.ultimo) {
+                elLastTime.innerText = qrStatsData.ultimo.hora || '--:--:--';
+            }
+
+            // Si el modal de sponsor está abierto, sincronizar su contador
+            if (sponsorModalActivo) {
+                const modalCount = document.getElementById('sponsor-modal-count');
+                if (modalCount) modalCount.innerText = `${qrStatsData.por_sponsor[sponsorModalActivo] || 0} escaneos`;
+            }
+        }
+
+        // =========================================================================
+        // TELEMETRÍA DE HARDWARE EN TIEMPO REAL (system_control)
+        // =========================================================================
+        let ultimaTelemetria = null;
+
+        // Calibración LiPo 3S con datos empíricos de celda y restricciones (constraints):
+        //  - 12.690 V ==>  99.0% (Límite superior / carga completa)
+        //  - 12.535 V ==>  98.0% (Fin de zona de tensión superficial)
+        //  - 11.650 V ==>  58.0% (Meseta de descarga nominal)
+        //  -  9.200 V ==>   0.0% (Corte por descarga / protección)
+        //  - <= 0.50V ==>   Robot Apagado (0%)
+        function calcularPorcentajeDesdeVoltaje(vVal) {
+            if (vVal === null || vVal === undefined || vVal === '') return 0;
+            const v = parseFloat(vVal);
+            if (isNaN(v) || v <= 0.5) return 0;
+
+            // Constraint inferior (corte a 9.20V o menos)
+            if (v <= 9.20) return 0;
+            // Constraint superior (máximo 99% a 12.69V o más)
+            if (v >= 12.69) return 99;
+
+            // Interpolación restringida por tramos según datos empíricos reales
+            const calibracion = [
+                { v: 12.690, p: 99.0 },
+                { v: 12.535, p: 98.0 },
+                { v: 11.650, p: 58.0 },
+                { v: 9.200,  p: 0.0 }
+            ];
+
+            for (let i = 0; i < calibracion.length - 1; i++) {
+                const pAlto = calibracion[i];
+                const pBajo = calibracion[i + 1];
+                if (v <= pAlto.v && v >= pBajo.v) {
+                    const ratio = (v - pBajo.v) / (pAlto.v - pBajo.v);
+                    const pct = pBajo.p + ratio * (pAlto.p - pBajo.p);
+                    return Math.min(99, Math.max(0, parseFloat(pct.toFixed(1))));
+                }
+            }
+
+            return 0;
+        }
+
+        function estimarVoltajeDesdePorcentaje(pVal) {
+            const p = Math.min(99, Math.max(0, parseFloat(pVal) || 0));
+            if (p <= 0) return '0.00';
+            if (p >= 98) {
+                return (12.535 + ((p - 98) / (99 - 98)) * (12.690 - 12.535)).toFixed(2);
+            }
+            if (p >= 58) {
+                return (11.650 + ((p - 58) / (98 - 58)) * (12.535 - 11.650)).toFixed(2);
+            }
+            return (9.200 + (p / 58) * (11.650 - 9.200)).toFixed(2);
+        }
+
+        function normalizarPorcentajeBateria(pVal, vVal) {
+            // Si entra el voltaje, la propia página calcula el porcentaje con el constraint
+            if (vVal !== null && vVal !== undefined && vVal !== '') {
+                const v = parseFloat(vVal);
+                if (!isNaN(v)) {
+                    return calcularPorcentajeDesdeVoltaje(v);
+                }
+            }
+            // Fallback en caso de que solo exista porcentaje en la fila
+            let p = (pVal !== null && pVal !== undefined && pVal !== '') ? parseFloat(pVal) : NaN;
+            if (!isNaN(p) && p > 0) {
+                return Math.min(99, Math.max(0, parseFloat(p.toFixed(1))));
+            }
+            return 0;
+        }
+
+        function actualizarTelemetriaUI(row) {
+            if (!row) return;
+            ultimaTelemetria = row;
+
+            const v1 = (row.battery_v1 !== undefined && row.battery_v1 !== null) ? parseFloat(row.battery_v1) : null;
+            const v2 = (row.battery_v2 !== undefined && row.battery_v2 !== null) ? parseFloat(row.battery_v2) : null;
+            const v3 = (row.battery_v3 !== undefined && row.battery_v3 !== null) ? parseFloat(row.battery_v3) : null;
+
+            // El frontend calcula el porcentaje directamente desde el voltaje entrante
+            const p1 = (v1 !== null) ? calcularPorcentajeDesdeVoltaje(v1) : normalizarPorcentajeBateria(row.battery_p1, v1);
+            const p2 = (v2 !== null) ? calcularPorcentajeDesdeVoltaje(v2) : normalizarPorcentajeBateria(row.battery_p2, v2);
+            const p3 = (v3 !== null) ? calcularPorcentajeDesdeVoltaje(v3) : normalizarPorcentajeBateria(row.battery_p3, v3);
+
+            // Detección: si los voltajes y/o porcentajes son 0 o <= 0.5V, el robot está apagado
+            const isRobotApagado = (
+                (v1 !== null && v1 <= 0.5) &&
+                (v2 !== null && v2 <= 0.5) &&
+                (v3 !== null && v3 <= 0.5)
+            ) || (
+                (v1 === null || v1 <= 0.5) && (v2 === null || v2 <= 0.5) && (v3 === null || v3 <= 0.5) &&
+                p1 <= 0 && p2 <= 0 && p3 <= 0
+            ) || (
+                String(row.robot_state || '').trim().toUpperCase() === 'ROBOT APAGADO' ||
+                String(row.robot_state || '').trim().toUpperCase() === 'APAGADO'
+            );
+
+            const st = (row.robot_state || '').trim().toUpperCase();
+            const isMoving = !isRobotApagado && (st.includes('MOVIMIENTO') || st.includes('MOV'));
+
+            if (globalData && globalData.robots && globalData.robots.orbit_1) {
+                globalData.robots.orbit_1.baterias = [p1, p2, p3];
+                globalData.robots.orbit_1.bateria = Math.round((p1 + p2 + p3) / 3);
+                globalData.robots.orbit_1.estado = isRobotApagado ? 'Robot Apagado' : (isMoving ? 'MOVIMIENTO' : 'EN REPOSO');
+            }
+
+            // Indicador de encendido / apagado en el botón superior
+            const pwrInd = document.getElementById('orbit-1-power-indicator');
+            if (pwrInd) {
+                if (isRobotApagado) {
+                    pwrInd.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-rose-500/10 text-rose-400 border border-rose-500/30';
+                } else {
+                    pwrInd.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+                }
+            }
+
+            // 1. Tarjetas de las 3 baterías
+            const batteriesGrid = document.getElementById('batteries-grid');
+            if (batteriesGrid) {
+                const bats = [
+                    { num: 1, p: p1, v: v1 },
+                    { num: 2, p: p2, v: v2 },
+                    { num: 3, p: p3, v: v3 }
+                ];
+                let html = '';
+                bats.forEach(b => {
+                    const isBatOff = isRobotApagado || (b.v !== null && b.v <= 0.5);
+                    if (isBatOff) {
+                        html += `
+                            <div class="bg-slate-950 p-4 rounded-xl border border-rose-950/40 shadow-inner opacity-80">
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="text-xs text-slate-400 uppercase font-mono font-semibold tracking-wider">BATERÍA ${b.num}</p>
+                                    <i class="fa-solid fa-battery-empty text-base text-rose-500"></i>
+                                </div>
+                                <div class="flex items-baseline justify-between">
+                                    <p class="text-3xl font-black font-mono text-rose-400 tracking-tight">0.00 <span class="text-lg text-slate-500 font-bold">V</span></p>
+                                    <span class="text-xs font-mono px-2 py-0.5 rounded bg-rose-950/40 border border-rose-900/60 text-rose-400 font-bold uppercase tracking-wider">Robot Apagado</span>
+                                </div>
+                                <div class="w-full bg-slate-800/80 h-2 rounded-full overflow-hidden mt-3">
+                                    <div class="h-full rounded-full" style="width: 0%; background-color: #EF4444"></div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        let nivelColor = '#10B981';
+                        let icono = 'fa-battery-full';
+                        if (b.p >= 75) { nivelColor = '#10B981'; icono = 'fa-battery-full'; }
+                        else if (b.p >= 50) { nivelColor = '#F59E0B'; icono = 'fa-battery-three-quarters'; }
+                        else if (b.p >= 25) { nivelColor = '#F97316'; icono = 'fa-battery-quarter'; }
+                        else { nivelColor = '#EF4444'; icono = 'fa-battery-empty'; }
+
+                        const vDisplay = (b.v !== null && !isNaN(b.v)) ? b.v.toFixed(2) : '0.00';
+                        const displayPct = (b.p % 1 === 0) ? b.p : b.p.toFixed(1);
+
+                        html += `
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/90 shadow-inner">
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="text-xs text-slate-400 uppercase font-mono font-semibold tracking-wider">BATERÍA ${b.num}</p>
+                                    <i class="fa-solid ${icono} text-base" style="color: ${nivelColor}"></i>
+                                </div>
+                                <div class="flex items-baseline justify-between">
+                                    <p class="text-3xl font-black font-mono text-white tracking-tight">${vDisplay} <span class="text-lg font-bold" style="color: ${nivelColor}">V</span></p>
+                                    <span class="text-xs font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 font-semibold">${displayPct}%</span>
+                                </div>
+                                <div class="w-full bg-slate-800/80 h-2 rounded-full overflow-hidden mt-3">
+                                    <div class="h-full rounded-full transition-all duration-500" style="width: ${Math.min(99, Math.max(0, b.p))}%; background-color: ${nivelColor}"></div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                batteriesGrid.innerHTML = html;
+            }
+
+            // 2. Estado de Ventilador (FAN)
+            const isFanOn = (row.fan_state === true || String(row.fan_state).toLowerCase() === 'true' || row.fan_state === 1);
+            const fanEl = document.getElementById('telemetry-fan');
+            if (fanEl) {
+                if (isRobotApagado) {
+                    fanEl.innerHTML = `<i class="fa-solid fa-fan text-slate-600"></i> <span class="text-slate-500">OFF (Apagado)</span>`;
+                } else if (isFanOn) {
+                    fanEl.innerHTML = `<i class="fa-solid fa-fan text-emerald-400 fa-spin"></i> <span class="text-emerald-400 font-bold">ON</span>`;
+                } else {
+                    fanEl.innerHTML = `<i class="fa-solid fa-fan text-slate-400"></i> <span class="text-white">OFF</span>`;
+                }
+            }
+
+            // 3. Motores Base
+            const motEl = document.getElementById('telemetry-motors');
+            if (motEl) {
+                if (isRobotApagado) {
+                    motEl.innerHTML = `<i class="fa-solid fa-power-off text-rose-400"></i> <span class="text-rose-400 font-bold">Robot Apagado</span>`;
+                } else if (isMoving) {
+                    motEl.innerHTML = `<i class="fa-solid fa-gear text-emerald-400 fa-spin"></i> <span class="text-emerald-400 font-bold">MOVIMIENTO</span>`;
+                } else {
+                    motEl.innerHTML = `<i class="fa-solid fa-gear text-slate-300"></i> <span class="text-white">En Reposo</span>`;
+                }
+            }
+
+            // 4. Estado de Orbit 1 en encabezado
+            const activeStatusEl = document.getElementById('active-robot-status');
+            if (activeStatusEl) {
+                if (isRobotApagado) {
+                    activeStatusEl.innerText = 'Robot Apagado';
+                    activeStatusEl.className = 'px-2.5 py-0.5 rounded-md bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/40 uppercase tracking-wider font-mono inline-block';
+                } else if (isMoving) {
+                    activeStatusEl.innerText = 'MOVIMIENTO';
+                    activeStatusEl.className = 'text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase tracking-wider font-bold animate-pulse';
+                } else {
+                    activeStatusEl.innerText = st || 'EN REPOSO';
+                    activeStatusEl.className = 'text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider font-bold';
+                }
+            }
+
+            // Badge de Telemetría (En Vivo vs Robot Apagado)
+            const liveBadge = document.getElementById('telemetry-live-badge');
+            if (liveBadge) {
+                if (isRobotApagado) {
+                    liveBadge.innerText = 'Robot Apagado';
+                    liveBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 uppercase tracking-wider font-bold';
+                } else {
+                    liveBadge.innerText = 'En Vivo';
+                    liveBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider font-bold';
+                }
+            }
+
+            // 5. Sensores LiDAR / Audio & Latencia
+            const sensorsEl = document.getElementById('telemetry-sensors');
+            if (sensorsEl) {
+                if (isRobotApagado) {
+                    sensorsEl.innerHTML = `<i class="fa-solid fa-circle-xmark text-slate-500"></i> <span class="text-slate-400">Desconectado</span>`;
+                } else {
+                    const lat = (row.latency_ms !== undefined && row.latency_ms !== null) ? row.latency_ms : null;
+                    if (lat !== null) {
+                        sensorsEl.innerHTML = `<i class="fa-solid fa-check-circle text-emerald-400"></i> <span class="text-emerald-400">100% OK (${lat}ms)</span>`;
+                    } else {
+                        sensorsEl.innerHTML = `<i class="fa-solid fa-check-circle text-emerald-400"></i> <span class="text-emerald-400">100% OK</span>`;
+                    }
+                }
+            }
+
+            // 6. Timestamp
+            const tsEl = document.getElementById('telemetry-timestamp');
+            if (tsEl) {
+                let tStr = '';
+                if (row.created_at) {
+                    try {
+                        tStr = new Date(row.created_at).toLocaleTimeString();
+                    } catch(e) {
+                        tStr = String(row.created_at).substring(11, 19);
+                    }
+                }
+                tsEl.innerText = tStr ? `Actualizado: ${tStr}` : `Actualizado: ${new Date().toLocaleTimeString()}`;
+            }
+        }
+
+        async function consultarTelemetria() {
+            // 1. Supabase Docker Local (REST directo con service_role JWT)
+            const dockerEp = await detectarDockerSupabase();
+            if (dockerEp) {
+                try {
+                    const ctrl = new AbortController();
+                    const timer = setTimeout(() => ctrl.abort(), 1200);
+                    const resp = await fetch(`${dockerEp}/rest/v1/system_control?select=*&order=id.desc&limit=1`, {
+                        headers: { 'apikey': SUPABASE_DOCKER_KEY, 'Authorization': `Bearer ${SUPABASE_DOCKER_KEY}` },
+                        signal: ctrl.signal
+                    });
+                    clearTimeout(timer);
+                    if (resp.ok) {
+                        const rows = await resp.json();
+                        if (Array.isArray(rows) && rows.length > 0) {
+                            actualizarTelemetriaUI(rows[0]);
+                            return;
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            // 2. Cliente Supabase (Docker o Cloud)
+            if (supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('system_control')
+                        .select('*')
+                        .order('id', { ascending: false })
+                        .limit(1);
+                    if (!error && data && data.length > 0) {
+                        actualizarTelemetriaUI(data[0]);
+                        return;
+                    }
+                } catch(eSb) {}
+            }
+
+            // 3. Fallback Servidor Python (/api/telemetria)
+            try {
+                const resp = await fetch('/api/telemetria', { cache: 'no-cache' });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data && (data.battery_p1 !== undefined || data.battery_v1 !== undefined)) {
+                        actualizarTelemetriaUI(data);
+                        return;
+                    }
+                }
+            } catch(eApi) {}
+        }
+
+        // =========================================================================
+        // ACTUALIZACIÓN DE UI: MÉTRICAS, CARDS, SUBCATEGORÍAS Y GRÁFICA
+        // =========================================================================
+        function actualizarAnaliticaUI() {
+            const total = conversacionesData.length;
+
+            // Actualizar contadores globales y headers
+            const elHdrTotal = document.getElementById('header-total-count');
+            if (elHdrTotal) elHdrTotal.innerText = total;
+
+            const elBadgeTotal = document.getElementById('badge-total-consultas');
+            if (elBadgeTotal) elBadgeTotal.innerText = `${total} Consultas`;
+
+            const elBarKpiTotal = document.getElementById('bar-kpi-total');
+            if (elBarKpiTotal) elBarKpiTotal.innerText = total;
+
+            const elBarBtnCount = document.getElementById('bar-btn-count');
+            if (elBarBtnCount) elBarBtnCount.innerText = total;
+
+            const elBtnTotal = document.getElementById('btn-total-count');
+            if (elBtnTotal) elBtnTotal.innerText = total;
+
+            const elPrevTotal = document.getElementById('preview-total-count');
+            if (elPrevTotal) elPrevTotal.innerText = total;
+
+            const elChartLabel = document.getElementById('chart-total-label');
+            if (elChartLabel) elChartLabel.innerText = `${total} Total`;
+
+            const elModalTotal = document.getElementById('modal-kpi-total');
+            if (elModalTotal) elModalTotal.innerText = total;
+
+            const elKpiConsultas = document.getElementById('kpi-total-consultas');
+            if (elKpiConsultas) elKpiConsultas.innerText = total;
+
+            if (total === 0) return;
+
+            // Latencia promedio
+            const sumLat = conversacionesData.reduce((acc, c) => acc + (c.latencia_ms || 200), 0);
+            const avgLat = Math.round(sumLat / total);
+            const elBarLat = document.getElementById('bar-kpi-latencia');
+            if (elBarLat) elBarLat.innerText = `${avgLat} ms`;
+            const elModalLat = document.getElementById('modal-kpi-latencia');
+            if (elModalLat) elModalLat.innerText = `${avgLat} ms`;
+            const elKpiLat = document.getElementById('kpi-latencia');
+            if (elKpiLat) elKpiLat.innerText = `${avgLat} ms`;
+
+            // Idiomas ES / EN
+            const esCount = conversacionesData.filter(c => c.idioma === 'es').length;
+            const enCount = conversacionesData.filter(c => c.idioma === 'en').length;
+            const pctEs = Math.round((esCount / total) * 100) || 0;
+            const pctEn = Math.round((enCount / total) * 100) || 0;
+            const langStr = `${pctEs}% ES / ${pctEn}% EN`;
+            const elBarLang = document.getElementById('bar-kpi-idiomas');
+            if (elBarLang) elBarLang.innerText = langStr;
+            const elModalLang = document.getElementById('modal-kpi-idiomas');
+            if (elModalLang) elModalLang.innerText = langStr;
+
+            // Contadores de las 4 Categorías y Subcategorías
+            let counts = {
+                cultural: 0,
+                comercial: 0,
+                informativa: 0,
+                asistencia: 0
+            };
+
+            let subcounts = {
+                cultural: { 'Puerto Rico': 0, 'Venezuela': 0, 'Personajes & Figuras': 0, 'Historia & Costumbres': 0 },
+                comercial: { 'Patrocinadores': 0, 'Restaurantes & Comida': 0, 'Descuentos & QRs': 0, 'Comercio Local': 0 },
+                informativa: { 'Vuelos & Aeropuertos': 0, 'Transporte & Movilidad': 0, 'Centro de Convenciones': 0, 'Servicios & Estadía': 0 },
+                asistencia: { 'WRO 2026 Innovators': 0, 'Capacidades & IA Orbit': 0, 'Hardware & Sensores': 0, 'Saludos & Charla Casual': 0 }
+            };
+
+            conversacionesData.forEach(c => {
+                if (counts[c.categoria] !== undefined) {
+                    counts[c.categoria]++;
+                    if (subcounts[c.categoria] && subcounts[c.categoria][c.subcategoria] !== undefined) {
+                        subcounts[c.categoria][c.subcategoria]++;
+                    }
+                }
+            });
+
+            // 1. Cultural
+            const pctCultural = Math.round((counts.cultural / total) * 100) || 0;
+            const elCntCult = document.getElementById('count-cultural');
+            if (elCntCult) elCntCult.innerText = counts.cultural;
+            const elBdgCult = document.getElementById('badge-pct-cultural');
+            if (elBdgCult) elBdgCult.innerText = `${pctCultural}%`;
+            const elBarCult = document.getElementById('bar-cultural');
+            if (elBarCult) elBarCult.style.width = `${pctCultural}%`;
+
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = val;
+            };
+
+            setVal('sub-cultural-pr', subcounts.cultural['Puerto Rico']);
+            setVal('sub-cultural-vz', subcounts.cultural['Venezuela']);
+            setVal('sub-cultural-pers', subcounts.cultural['Personajes & Figuras']);
+            setVal('sub-cultural-hist', subcounts.cultural['Historia & Costumbres']);
+
+            // 2. Comercial
+            const pctComercial = Math.round((counts.comercial / total) * 100) || 0;
+            setVal('count-comercial', counts.comercial);
+            setVal('badge-pct-comercial', `${pctComercial}%`);
+            const elBarCom = document.getElementById('bar-comercial');
+            if (elBarCom) elBarCom.style.width = `${pctComercial}%`;
+
+            setVal('sub-comercial-sponsors', subcounts.comercial['Patrocinadores']);
+            setVal('sub-comercial-gastro', subcounts.comercial['Restaurantes & Comida']);
+            setVal('sub-comercial-promo', subcounts.comercial['Descuentos & QRs']);
+            setVal('sub-comercial-shopping', subcounts.comercial['Comercio Local']);
+
+            // 3. Informativa
+            const pctInformativa = Math.round((counts.informativa / total) * 100) || 0;
+            setVal('count-informativa', counts.informativa);
+            setVal('badge-pct-informativa', `${pctInformativa}%`);
+            const elBarInf = document.getElementById('bar-informativa');
+            if (elBarInf) elBarInf.style.width = `${pctInformativa}%`;
+
+            setVal('sub-info-vuelos', subcounts.informativa['Vuelos & Aeropuertos']);
+            setVal('sub-info-transporte', subcounts.informativa['Transporte & Movilidad']);
+            setVal('sub-info-recinto', subcounts.informativa['Centro de Convenciones']);
+            setVal('sub-info-servicios', subcounts.informativa['Servicios & Estadía']);
+
+            // 4. Asistencia & WRO
+            const pctAsistencia = Math.round((counts.asistencia / total) * 100) || 0;
+            setVal('count-asistencia', counts.asistencia);
+            setVal('badge-pct-asistencia', `${pctAsistencia}%`);
+            const elBarAsis = document.getElementById('bar-asistencia');
+            if (elBarAsis) elBarAsis.style.width = `${pctAsistencia}%`;
+
+            setVal('sub-asis-wro', subcounts.asistencia['WRO 2026 Innovators']);
+            setVal('sub-asis-capacidades', subcounts.asistencia['Capacidades & IA Orbit']);
+            setVal('sub-asis-hardware', subcounts.asistencia['Hardware & Sensores']);
+            setVal('sub-asis-saludos', subcounts.asistencia['Saludos & Charla Casual']);
+
+            // Actualizar Gráfica Donut
+            actualizarGrafica([counts.cultural, counts.comercial, counts.informativa, counts.asistencia]);
+
+            // Actualizar vista previa (últimas 4 interacciones)
+            renderizarVistaPrevia();
+        }
+
+        // =========================================================================
+        // GRÁFICA DE DONUT (CHART.JS)
+        // =========================================================================
+        function actualizarGrafica(dataValues) {
+            const ctx = document.getElementById('consultasChart');
+            if (!ctx) return;
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js no cargado (modo offline)');
+                return;
+            }
+
+            const labels = ['Culturales', 'Comerciales', 'Informativas', 'WRO & Asistencia'];
+            const colors = ['#F59E0B', '#10B981', '#06B6D4', '#8B5CF6'];
+
+            if (activeChart) {
+                activeChart.data.datasets[0].data = dataValues;
+                activeChart.update();
+                return;
+            }
+
+            activeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: colors,
+                        borderColor: '#020617',
+                        borderWidth: 3,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '72%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleColor: '#f8fafc',
+                            bodyColor: '#94a3b8',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            padding: 10,
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const pct = total ? Math.round((val / total) * 100) : 0;
+                                    return ` ${context.label}: ${val} (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // =========================================================================
+        // VISTA PREVIA DE INTERACCIONES EN EL MÓDULO 3
+        // =========================================================================
+        function renderizarVistaPrevia() {
+            const contenedor = document.getElementById('consultas-preview-list');
+            if (!contenedor) return;
+
+            const ultimas = conversacionesData.slice(0, 4);
+            if (ultimas.length === 0) {
+                contenedor.innerHTML = '<div class="p-6 text-center text-slate-500 text-xs font-mono">No hay interacciones registradas aún.</div>';
+                return;
+            }
+
+            contenedor.innerHTML = '';
+            ultimas.forEach(item => {
+                const conf = CATEGORIAS_CONFIG[item.categoria] || CATEGORIAS_CONFIG.cultural;
+                contenedor.innerHTML += `
+                    <div class="p-3.5 hover:bg-slate-900/50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${conf.badgeClass}">
+                                    <i class="fa-solid ${conf.icon} mr-1"></i>${item.subcategoria}
+                                </span>
+                                <span class="text-[11px] text-slate-400 font-mono">#${item.tema}</span>
+                                <span class="text-[10px] text-slate-500 font-mono">&bull; ${item.hora || ''}</span>
+                            </div>
+                            <p class="font-medium text-slate-200 truncate">"${item.pregunta}"</p>
+                        </div>
+                        <div class="flex items-center gap-3 shrink-0">
+                            <span class="text-[11px] font-mono text-slate-400"><i class="fa-solid fa-bolt text-amber-400 mr-1"></i>${item.latencia_ms}ms</span>
+                            <span class="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] font-bold uppercase text-slate-300 font-mono">${item.idioma}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // =========================================================================
+        // MODAL DE HISTORIAL COMPLETO
+        // =========================================================================
+        function abrirHistorialModal() {
+            document.getElementById('historialModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            renderizarModalFeed();
+        }
+
+        function cerrarHistorialModal() {
+            document.getElementById('historialModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function filtrarCategoriaModal(cat, btn) {
+            modalFiltroCategoria = cat;
+            document.querySelectorAll('.filter-cat-btn').forEach(b => {
+                b.classList.remove('bg-theme', 'text-slate-950', 'font-black');
+                b.classList.add('bg-slate-800/80', 'text-slate-300');
+            });
+            btn.classList.add('bg-theme', 'text-slate-950', 'font-black');
+            btn.classList.remove('bg-slate-800/80', 'text-slate-300');
+            renderizarModalFeed();
+        }
+
+        function filtrarIdiomaModal(idioma, btn) {
+            modalFiltroIdioma = idioma;
+            document.querySelectorAll('.filter-lang-btn').forEach(b => {
+                b.classList.remove('bg-theme', 'text-slate-950', 'font-black');
+                b.classList.add('bg-slate-800/80', 'text-slate-300');
+            });
+            btn.classList.add('bg-theme', 'text-slate-950', 'font-black');
+            btn.classList.remove('bg-slate-800/80', 'text-slate-300');
+            renderizarModalFeed();
+        }
+
+        function renderizarModalFeed() {
+            const contenedor = document.getElementById('modal-feed-list');
+            if (!contenedor) return;
+
+            const q = (document.getElementById('modalSearchInput')?.value || '').toLowerCase().trim();
+
+            let filtradas = conversacionesData.filter(item => {
+                // Filtro Categoría
+                if (modalFiltroCategoria !== 'todos' && item.categoria !== modalFiltroCategoria) return false;
+                // Filtro Idioma
+                if (modalFiltroIdioma !== 'todos' && item.idioma !== modalFiltroIdioma) return false;
+                // Búsqueda de Texto
+                if (q) {
+                    const matchQ = item.pregunta.toLowerCase().includes(q) ||
+                                   item.respuesta.toLowerCase().includes(q) ||
+                                   item.subcategoria.toLowerCase().includes(q) ||
+                                   item.tema.toLowerCase().includes(q);
+                    if (!matchQ) return false;
+                }
+                return true;
+            });
+
+            const elModalCount = document.getElementById('modal-feed-count');
+            if (elModalCount) {
+                elModalCount.innerText = `Mostrando ${filtradas.length} de ${conversacionesData.length} interacciones`;
+            }
+
+            if (filtradas.length === 0) {
+                contenedor.innerHTML = `
+                    <div class="p-12 text-center text-slate-500 font-mono">
+                        <i class="fa-solid fa-magnifying-glass text-3xl mb-3 text-slate-600"></i>
+                        <p class="text-sm">No se encontraron consultas con los filtros seleccionados.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            contenedor.innerHTML = '';
+            filtradas.forEach(item => {
+                const conf = CATEGORIAS_CONFIG[item.categoria] || CATEGORIAS_CONFIG.cultural;
+                const reaccionHTML = item.reaccion ? `<div class="my-1.5"><span class="text-xs sm:text-sm text-amber-300 font-mono italic px-2.5 py-1 rounded-md bg-amber-500/15 border border-amber-500/30 inline-flex items-center gap-1.5"><i class="fa-solid fa-comment-dots text-amber-400"></i>Reacción: "${item.reaccion}"</span></div>` : '';
+                
+                contenedor.innerHTML += `
+                    <div class="p-4 sm:p-5 rounded-xl bg-slate-950/80 border border-slate-800 hover:border-slate-700 transition-all shadow-md">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5 pb-2.5 border-b border-slate-800/60">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="px-2 py-0.5 rounded bg-slate-800 text-xs font-mono font-bold uppercase text-slate-200 border border-slate-700">${item.idioma}</span>
+                                <span class="px-2.5 py-0.5 rounded text-xs font-bold ${conf.badgeClass}">
+                                    <i class="fa-solid ${conf.icon} mr-1"></i>${item.subcategoria}
+                                </span>
+                                <span class="text-xs font-mono text-slate-300">#${item.tema}</span>
+                                <span class="text-xs font-mono text-amber-400"><i class="fa-solid fa-bolt mr-1"></i>${item.latencia_ms} ms</span>
+                            </div>
+                            <span class="text-xs font-mono text-slate-400 font-medium">${item.fecha} &bull; ${item.hora}</span>
+                        </div>
+                        <div class="space-y-2 text-sm sm:text-base">
+                            <div class="flex items-start gap-2.5">
+                                <span class="font-mono font-bold text-slate-400 shrink-0 text-xs sm:text-sm pt-0.5"><i class="fa-solid fa-user text-slate-400 mr-1.5"></i>JURADO:</span>
+                                <p class="text-white font-semibold text-sm sm:text-base">"${item.pregunta}"</p>
+                            </div>
+                            ${reaccionHTML}
+                            <div class="flex items-start gap-2.5 pt-1">
+                                <span class="font-mono font-bold text-theme shrink-0 text-xs sm:text-sm pt-0.5"><i class="fa-solid fa-robot text-theme mr-1.5"></i>ORBIT:</span>
+                                <p class="text-slate-200 leading-relaxed text-xs sm:text-sm">${item.respuesta}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // =========================================================================
+        // UTILIDADES Y MODAL QR PARA TELÉFONO
+        // =========================================================================
+        function copiarAlPortapapeles(texto) {
+            navigator.clipboard.writeText(texto).then(() => {
+                alert('¡Enlace de producción copiado al portapapeles!');
+            }).catch(err => {
+                prompt('Copia este enlace para abrir en tu celular:', texto);
+            });
+        }
+
+        function abrirModalQR() {
+            document.getElementById('qrModal').classList.add('active');
+            generarQRCode();
+        }
+
+
+        // =========================================================================
+        // CONTROL DEL MODAL DE PATROCINADORES Y SIMULACIÓN DE ESCANEO
+        // =========================================================================
+        let sponsorModalActivo = null;
+
+        function abrirModalSponsor(sponsorId) {
+            sponsorModalActivo = sponsorId;
+            const sponsors = globalData.patrocinadores[currentOrbitId] || globalData.patrocinadores.orbit_1;
+            const sp = sponsors.find(s => s.id === sponsorId) || sponsors[0];
+            if (!sp) return;
+
+            document.getElementById('sponsor-modal-flag').innerText = sp.pais || 'PR/VZ';
+            document.getElementById('sponsor-modal-title').innerText = sp.nombre;
+            document.getElementById('sponsor-modal-cat').innerText = sp.cat || 'Aliado B2B';
+            document.getElementById('sponsor-modal-promo').innerText = sp.promo || 'Beneficio Especial';
+            
+            const linkEl = document.getElementById('sponsor-modal-link');
+            linkEl.href = sp.url;
+            linkEl.innerText = sp.url;
+
+            document.getElementById('sponsor-modal-img').src = sp.qr_file;
+            document.getElementById('sponsor-modal-count').innerText = `${qrStatsData.por_sponsor[sp.id] || 0} escaneos`;
+
+            const modal = document.getElementById('modalSponsorQR');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function cerrarModalSponsorQR() {
+            sponsorModalActivo = null;
+            const modal = document.getElementById('modalSponsorQR');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function simularEscaneoActual() {
+            if (sponsorModalActivo) {
+                simularEscaneo(sponsorModalActivo);
+            }
+        }
+
+        async function simularEscaneo(sponsorId) {
+            const spKey = normalizarSponsorId(sponsorId);
+            qrStatsData.total += 1;
+            qrStatsData.por_sponsor[spKey] = (qrStatsData.por_sponsor[spKey] || 0) + 1;
+            qrStatsData.ultimo = {
+                sponsor_id: spKey,
+                hora: new Date().toLocaleTimeString()
+            };
+            renderizarValoresQR();
+
+            // 1. Enviar a backend local de Orbit Python (/api/qr)
+            try {
+                fetch('/api/qr', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sponsor_id: spKey,
+                        qr_code: 'ORBIT_SCAN',
+                        robot_id: currentOrbitId || 'orbit_1'
+                    })
+                }).catch(() => {});
+            } catch(e) {}
+
+            // 2. Si Docker Local está detectado, registrar en la tabla qr_mostrados de PostgreSQL local
+            if (localDockerEndpointActivo) {
+                try {
+                    fetch(`${localDockerEndpointActivo}/rest/v1/qr_mostrados`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_DOCKER_KEY,
+                            'Authorization': `Bearer ${SUPABASE_DOCKER_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify({
+                            robot_id: currentOrbitId || 'orbit_1',
+                            sponsor_id: spKey,
+                            qr_code: 'ORBIT_SIMULATED',
+                            shown_at: new Date().toISOString()
+                        })
+                    }).catch(() => {});
+                } catch(eDocker) {}
+            }
+
+            // 3. Si Supabase Client está conectado (Cloud o Docker SDK), registrar también
+            if (supabaseClient) {
+                try {
+                    await supabaseClient.from('qr_mostrados').insert([{
+                        robot_id: currentOrbitId || 'orbit_1',
+                        sponsor_id: spKey,
+                        qr_code: 'ORBIT_SIMULATED',
+                        shown_at: new Date().toISOString()
+                    }]);
+                } catch(errSb) {}
+            }
+        }
+
+        function cerrarModalQR() {
+            document.getElementById('qrModal').classList.remove('active');
+        }
+
+        function generarQRCode() {
+            const qrContainer = document.getElementById("qrcode");
+            if (!qrContainer) return;
+            if (typeof QRCode === 'undefined') {
+                qrContainer.innerHTML = '<div class="p-4 text-xs font-mono text-slate-500">QR disponible con conexión o escaneando desde el rostro de Orbit</div>';
+                return;
+            }
+            qrContainer.innerHTML = "";
+            const targetUrl = PRODUCCION_URL;
+            new QRCode(qrContainer, {
+                text: targetUrl,
+                width: 190,
+                height: 190,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        // Control de Acordeón
+        function toggleAccordion(btn) {
+            const content = btn.nextElementSibling;
+            const isOpen = content.classList.contains('open');
+            content.classList.toggle('open');
+            btn.setAttribute('aria-expanded', !isOpen);
+        }
+
+        // =========================================================================
+        // SELECCIÓN DE UNIDAD ROBÓTICA (SEGURO Y ROBUSTO)
+        // =========================================================================
+        function seleccionarOrbit(orbitId, element = null) {
+            document.querySelectorAll('.unit-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-theme', 'bg-slate-800');
+            });
+
+            // Localizar el botón de forma completamente segura (evita bug de window.event en DOMContentLoaded)
+            let targetBtn = element;
+            if (!targetBtn && typeof event !== 'undefined' && event && event.currentTarget && event.currentTarget.classList) {
+                targetBtn = event.currentTarget;
+            }
+            if (!targetBtn) {
+                targetBtn = document.querySelector(`button[onclick*="'${orbitId}'"]`) || 
+                            document.querySelector(`button[onclick*="${orbitId}"]`);
+            }
+
+            if (targetBtn && targetBtn.classList) {
+                targetBtn.classList.add('ring-2', 'ring-theme', 'bg-slate-800');
+                const themeColor = targetBtn.getAttribute('data-color') || '#10B981';
+                document.documentElement.style.setProperty('--theme', themeColor);
+                let r = 16, g = 185, b = 129;
+                if (themeColor === '#10B981') { r = 16; g = 185; b = 129; }
+                else if (themeColor === '#06B6D4') { r = 6; g = 182; b = 212; }
+                else if (themeColor === '#F59E0B') { r = 245; g = 158; b = 11; }
+                else if (themeColor === '#8B5CF6') { r = 139; g = 92; b = 246; }
+                document.documentElement.style.setProperty('--theme-glow', `rgba(${r},${g},${b},0.3)`);
+                document.documentElement.style.setProperty('--theme-bg', `rgba(${r},${g},${b},0.15)`);
+            }
+
+            // Mostrar Dashboard del Robot
+            const dash = document.getElementById('robot-dashboard');
+            if (dash) dash.classList.remove('hidden');
+
+            const robotInfo = globalData.robots[orbitId] || globalData.robots.orbit_1;
+            
+            const elName = document.getElementById('active-robot-name');
+            if (elName) elName.innerText = robotInfo.nombre;
+
+            const elStatus = document.getElementById('active-robot-status');
+            if (elStatus) elStatus.innerText = robotInfo.estado;
+
+            // Módulo 1: Telemetría de Baterías
+            if (ultimaTelemetria) {
+                actualizarTelemetriaUI(ultimaTelemetria);
+            } else {
+                const batteriesGrid = document.getElementById('batteries-grid');
+                if (batteriesGrid) {
+                    batteriesGrid.innerHTML = '';
+                    const baterias = robotInfo.baterias || [robotInfo.bateria];
+                    baterias.forEach((nivel, i) => {
+                        let nivelColor, icono;
+                        if (nivel >= 75) { nivelColor = '#10B981'; icono = 'fa-battery-full'; }
+                        else if (nivel >= 50) { nivelColor = '#F59E0B'; icono = 'fa-battery-three-quarters'; }
+                        else if (nivel >= 25) { nivelColor = '#F97316'; icono = 'fa-battery-quarter'; }
+                        else { nivelColor = '#EF4444'; icono = 'fa-battery-empty'; }
+
+                        const vEst = estimarVoltajeDesdePorcentaje(nivel);
+                        const displayNivel = Math.min(99, Math.max(0, nivel));
+                        batteriesGrid.innerHTML += `
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/90 shadow-inner">
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="text-xs text-slate-400 uppercase font-mono font-semibold tracking-wider">BATERÍA ${i + 1}</p>
+                                    <i class="fa-solid ${icono} text-base" style="color: ${nivelColor}"></i>
+                                </div>
+                                <div class="flex items-baseline justify-between">
+                                    <p class="text-3xl font-black font-mono text-white tracking-tight">${vEst} <span class="text-lg font-bold" style="color: ${nivelColor}">V</span></p>
+                                    <span class="text-xs font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 font-semibold">${displayNivel}%</span>
+                                </div>
+                                <div class="w-full bg-slate-800/80 h-2 rounded-full overflow-hidden mt-3">
+                                    <div class="h-full rounded-full transition-all duration-500" style="width: ${displayNivel}%; background-color: ${nivelColor}"></div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            }
+
+            // Módulo 2: Sponsors B2B (8 ALIADOS CON LIVE QR COUNTERS & MODAL INTERACTIVO)
+            const sponsorsTable = document.getElementById('sponsors-list');
+            if (sponsorsTable) {
+                sponsorsTable.innerHTML = '';
+                const sponsors = globalData.patrocinadores[orbitId] || globalData.patrocinadores.orbit_1;
+                sponsors.forEach(sp => {
+                    const badgeClass = sp.activo ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-slate-800 text-slate-400 border-slate-700';
+                    const vistasCount = (qrStatsData.por_sponsor && qrStatsData.por_sponsor[sp.id] !== undefined) ? qrStatsData.por_sponsor[sp.id] : (sp.vistas || 0);
+                    const promoBadge = sp.promo ? `<span class="ml-2 text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300">${sp.promo}</span>` : '';
+                    const paisBadge = sp.pais ? `<span class="text-[11px] px-1.5 py-0.5 rounded bg-slate-800/80 border border-slate-700 text-slate-200 font-mono">${sp.pais}</span>` : '';
+
+                    sponsorsTable.innerHTML += `
+                        <tr class="hover:bg-slate-900/60 transition-colors">
+                            <td class="p-3 font-semibold text-white flex items-center gap-2">
+                                ${paisBadge}
+                                <i class="fa-solid fa-store ${sp.color || 'text-slate-400'}"></i>
+                                <span>${sp.nombre}</span>
+                                ${promoBadge}
+                            </td>
+                            <td class="p-3"><span class="px-2 py-1 text-[10px] uppercase font-bold rounded border ${badgeClass}">${sp.activo ? 'Activo' : 'Pausado'}</span></td>
+                            <td class="p-3 font-mono text-slate-200">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 transition-all duration-300">
+                                <i class="fa-solid fa-qrcode text-theme"></i>
+                                <span id="qr-count-${sp.id}" class="font-bold text-white">${vistasCount}</span>
+                                <span class="text-xs text-slate-400">escaneos</span>
+                            </span>
+                            </td>
+                            <td class="p-3 text-right">
+                                <div class="flex items-center justify-end gap-1">
+                                    <button onclick="abrirModalSponsor('${sp.id}')" class="text-emerald-400 hover:text-white p-1.5 rounded hover:bg-slate-800 transition-colors" title="Ver Código QR Oficial">
+                                        <i class="fa-solid fa-qrcode"></i>
+                                    </button>
+                                    <button onclick="simularEscaneo('${sp.id}')" class="text-amber-400 hover:text-white p-1.5 rounded hover:bg-slate-800 transition-colors" title="Simular Escaneo (+1)">
+                                        <i class="fa-solid fa-bolt"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Módulo 4: Calificación CSAT
+            const elCsat = document.getElementById('csat-score');
+            if (elCsat) elCsat.innerText = robotInfo.csat.toFixed(1);
+        }
+
+        // Manejador tecla ESC para cerrar modales
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cerrarHistorialModal();
+                cerrarModalQR();
+                cerrarModalSponsorQR();
+            }
+        });
+
+        // =========================================================================
+        // INICIALIZACIÓN
+        // =========================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            try { generarQRCode(); } catch(e) {}
+            try { seleccionarOrbit('orbit_1'); } catch(e) { console.error('Error seleccionando orbit_1:', e); }
+            try { conectarSupabase(); } catch(e) { console.error('Error conectando a supabase:', e); }
+            try { consultarTelemetria(); } catch(e) {}
+            try { actualizarMetricasQR(); } catch(e) {}
+            setInterval(consultarTelemetria, 1500);
+            setInterval(actualizarMetricasQR, 2500);
+        });
+    </script>
+
+
+</body>
+</html>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ORBIT Robot - WRO Vectorized Circuit Diagram</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      background-color: var(--background, #0b1120);
+      color: var(--foreground, #f8fafc);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    .svg-container {
+      position: relative;
+      width: 100%;
+      height: 75vh;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #0f172a 0%, #070a13 100%);
+      border: 1px solid var(--border, #334155);
+      border-radius: 12px;
+      cursor: grab;
+    }
+    .svg-container:active {
+      cursor: grabbing;
+    }
+    .wire-active {
+      filter: drop-shadow(0 0 6px currentColor);
+      transition: all 0.3s ease;
+    }
+    .wire-dimmed {
+      opacity: 0.12 !important;
+      transition: all 0.3s ease;
+    }
+  </style>
+</head>
+<body class="p-6">
+  <div class="max-w-7xl mx-auto space-y-6">
+    
+    <!-- Top Bar: Title & Actions -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[var(--card,#1e293b)] p-5 rounded-2xl border border-[var(--border,#334155)] shadow-lg">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">WRO 2026</span>
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">REV 2.4 APPROVED</span>
+          <span class="text-xs text-[var(--muted-foreground,#94a3b8)]">Standard: ISO 61082 / IEC 60617</span>
+        </div>
+        <h1 class="text-2xl font-black tracking-tight text-white flex items-center gap-2">
+          ⚡ ORBIT V2.0 Autonomous Robot — Electrical & Wiring Harness Schematic
+        </h1>
+        <p class="text-sm text-[var(--muted-foreground,#94a3b8)]">
+          Full vectorized blueprint matching the circular physical chassis, MegaPi (ATmega2560), Raspberry Pi 5, dual BTS7960 43A motor drivers, and 4x VL53L0X Time-of-Flight sensor array.
+        </p>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="flex items-center gap-3">
+        <button id="downloadSvgBtn" class="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl transition shadow-md">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          Download Vector (SVG for Canva)
+        </button>
+        <button id="resetZoomBtn" class="px-3 py-2.5 bg-[var(--card,#334155)] hover:bg-slate-700 text-sm font-semibold rounded-xl border border-[var(--border,#475569)] transition">
+          Reset View
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter Pills for Subsystem Highlighting -->
+    <div class="bg-[var(--card,#1e293b)] p-3 rounded-xl border border-[var(--border,#334155)] flex flex-wrap items-center gap-2 text-xs font-bold">
+      <span class="text-[var(--muted-foreground,#94a3b8)] mr-2">Highlight Subsystem:</span>
+      <button class="filter-btn px-3 py-1.5 rounded-lg bg-blue-600 text-white" data-filter="all">All Wires (Full Diagram)</button>
+      <button class="filter-btn px-3 py-1.5 rounded-lg bg-slate-800 text-red-400 border border-red-500/40 hover:bg-red-950/40" data-filter="power-12v">🔴 12V High Power Bus</button>
+      <button class="filter-btn px-3 py-1.5 rounded-lg bg-slate-800 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-950/40" data-filter="power-5v">🟢 5V Logic Bus</button>
+      <button class="filter-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-600 hover:bg-slate-700" data-filter="gnd">⚪ Common Ground</button>
+      <button class="filter-btn px-3 py-1.5 rounded-lg bg-slate-800 text-sky-400 border border-sky-500/40 hover:bg-sky-950/40" data-filter="i2c">🔵 I²C Sensor Bus (SDA/SCL)</button>
+      <button class="filter-btn px-3 py-1.5 rounded-lg bg-slate-800 text-amber-400 border border-amber-500/40 hover:bg-amber-950/40" data-filter="pwm">🟠 Motor PWM Timers</button>
+      <button class="filter-btn px-3 py-1.5 rounded-lg bg-slate-800 text-purple-400 border border-purple-500/40 hover:bg-purple-950/40" data-filter="xshut">🟣 XSHUT Address Lines</button>
+      <button class="filter-btn px-3 py-1.5 rounded-lg bg-slate-800 text-pink-400 border border-pink-500/40 hover:bg-pink-950/40" data-filter="relay">🌸 Relay Actuators</button>
+      <button class="filter-btn px-3 py-1.5 rounded-lg bg-slate-800 text-cyan-400 border border-cyan-500/40 hover:bg-cyan-950/40" data-filter="usb">🔷 USB 2.0 Telemetry</button>
+    </div>
+
+    <!-- Interactive SVG Canvas Container -->
+    <div class="relative">
+      <div id="svgContainer" class="svg-container shadow-2xl flex items-center justify-center">
+        <!-- Embedded SVG Object -->
+        <div id="zoomLayer" style="transform-origin: 0 0; transition: transform 0.08s ease-out; width: 100%; height: 100%;">
+          <object id="svgObject" data="circuit_diagram_orbit_wro.svg" type="image/svg+xml" class="w-full h-full pointer-events-none select-none"></object>
+        </div>
+      </div>
+      
+      <!-- Overlay Floating Controls -->
+      <div class="absolute bottom-4 right-4 flex items-center gap-2 bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700 shadow-xl text-xs font-mono">
+        <button id="zoomInBtn" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-base font-bold">+</button>
+        <span id="zoomLevelDisplay">100%</span>
+        <button id="zoomOutBtn" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-base font-bold">-</button>
+      </div>
+    </div>
+
+    <!-- Complete Pin-to-Pin Interconnection Table for Judging -->
+    <div class="bg-[var(--card,#1e293b)] p-6 rounded-2xl border border-[var(--border,#334155)] shadow-xl space-y-4">
+      <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+        📋 Official Pin-to-Pin Interconnection Matrix (Ref: ORBITFINAL.ino)
+      </h2>
+      <p class="text-sm text-[var(--muted-foreground,#94a3b8)]">
+        Official wiring table for referee technical inspection, verifying isolation between the high-current 12V drive system and the 5V logic processing domain.
+      </p>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-slate-200 border-collapse">
+          <thead>
+            <tr class="border-b border-slate-700 text-xs font-black uppercase tracking-wider text-slate-400 bg-slate-900/50">
+              <th class="p-3">Subsystem / Device</th>
+              <th class="p-3">Device Pin</th>
+              <th class="p-3">Connected To</th>
+              <th class="p-3">MegaPi / Source Pin</th>
+              <th class="p-3">Signal Type & Voltage</th>
+              <th class="p-3">Software Variable / Function</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800 font-mono text-xs">
+            <!-- 12V Power -->
+            <tr class="hover:bg-slate-800/40">
+              <td class="p-3 font-sans font-bold text-red-400">Battery 3S LiPo</td>
+              <td class="p-3">XT60 (+) / (-)</td>
+              <td class="p-3">Main Terminal Strip</td>
+              <td class="p-3">Terminals 1 & 2 (Top)</td>
+              <td class="p-3 text-red-400 font-bold">11.1V - 12.6V DC</td>
+              <td class="p-3 font-sans text-slate-400">Main Raw Power In</td>
+            </tr>
+            <!-- Step Down -->
+            <tr class="hover:bg-slate-800/40">
+              <td class="p-3 font-sans font-bold text-emerald-400">XL4015 Buck Converter</td>
+              <td class="p-3">OUT (+) / OUT (-)</td>
+              <td class="p-3">Raspberry Pi & MegaPi</td>
+              <td class="p-3">USB-C & Logic 5V Header</td>
+              <td class="p-3 text-emerald-400 font-bold">5.08V DC (5A Max)</td>
+              <td class="p-3 font-sans text-slate-400">Regulated System Logic Bus</td>
+            </tr>
+            <!-- Left Motor -->
+            <tr class="hover:bg-slate-800/40">
+              <td class="p-3 font-sans font-bold text-amber-400">Left Driver (IBT-2)</td>
+              <td class="p-3">RPWM / LPWM</td>
+              <td class="p-3">MegaPi Port 3</td>
+              <td class="p-3 text-amber-300 font-bold">Pin 8 / Pin 7</td>
+              <td class="p-3 text-amber-400 font-bold">5V PWM (Timer 4)</td>
+              <td class="p-3 font-sans text-slate-400"><code>M3_RPWM = 8; M3_LPWM = 7;</code></td>
+            </tr>
+            <!-- Right Motor -->
+            <tr class="hover:bg-slate-800/40">
+              <td class="p-3 font-sans font-bold text-amber-400">Right Driver (IBT-2)</td>
+              <td class="p-3">RPWM / LPWM</td>
+              <td class="p-3">MegaPi Port 4</td>
+              <td class="p-3 text-amber-300 font-bold">Pin 6 / Pin 9</td>
+              <td class="p-3 text-amber-400 font-bold">5V PWM (Timer 1/2)</td>
+              <td class="p-3 font-sans text-slate-400"><code>M4_RPWM = 6; M4_LPWM = 9;</code></td>
+            </tr>
+            <!-- ToF Front -->
+            <tr class="hover:bg-slate-800/40">
+              <td class="p-3 font-sans font-bold text-purple-400">Front ToF (VL53L0X)</td>
+              <td class="p-3">XSHUT / SDA / SCL</td>
+              <td class="p-3">MegaPi Analog & I2C</td>
+              <td class="p-3 text-purple-300 font-bold">A1 (XSHUT), D20, D21</td>
+              <td class="p-3 text-sky-400 font-bold">I2C (0x30 Mapped)</td>
+              <td class="p-3 font-sans text-slate-400"><code>const int xshut_F = A1;</code></td>
+            </tr>
+            <!-- ToF Left -->
+            <tr class="hover:bg-slate-800/40">
+              <td class="p-3 font-sans font-bold text-purple-400">Left ToF (VL53L0X)</td>
+              <td class="p-3">XSHUT / SDA / SCL</td>
+              <td class="p-3">MegaPi Analog & I2C</td>
+              <td class="p-3 text-purple-300 font-bold">A2 (XSHUT), D20, D21</td>
+              <td class="p-3 text-sky-400 font-bold">I2C (0x31 Mapped)</td>
+              <td class="p-3 font-sans text-slate-400"><code>const int xshut_L = A2;</code></td>
+            </tr>
+            <!-- ToF Right -->
+            <tr class="hover:bg-slate-800/40">
+              <td class="p-3 font-sans font-bold text-purple-400">Right ToF (VL53L0X)</td>
+              <td class="p-3">XSHUT / SDA / SCL</td>
+              <td class="p-3">MegaPi Analog & I2C</td>
+              <td class="p-3 text-purple-300 font-bold">A3 (XSHUT), D20, D21</td>
+              <td class="p-3 text-sky-400 font-bold">I2C (0x32 Mapped)</td>
+              <td class="p-3 font-sans text-slate-400"><code>const int xshut_R = A3;</code></td>
+            </tr>
+            <!-- ToF Back -->
+            <tr class="hover:bg-slate-800/40">
+              <td class="p-3 font-sans font-bold text-purple-400">Back ToF (VL53L0X)</td>
+              <td class="p-3">XSHUT / SDA / SCL</td>
+              <td class="p-3">MegaPi Digital & I2C</td>
+              <td class="p-3 text-purple-300 font-bold">D2 (XSHUT), D20, D21</td>
+              <td class="p-3 text-sky-400 font-bold">I2C (0x33 Mapped)</td>
+              <td class="p-3 font-sans text-slate-400"><code>const int xshut_B = 2;</code></td>
+            </tr>
+            <!-- Relays -->
+            <tr class="hover:bg-slate-800/40">
+              <td class="p-3 font-sans font-bold text-pink-400">Relay 1: Main Bus</td>
+              <td class="p-3">IN Trigger</td>
+              <td class="p-3">MegaPi Analog</td>
+              <td class="p-3 text-pink-300 font-bold">Pin A5</td>
+              <td class="p-3 text-pink-400 font-bold">5V Digital Out</td>
+              <td class="p-3 font-sans text-slate-400"><code>const int pinRele = A5;</code></td>
+            </tr>
+            <tr class="hover:bg-slate-800/40">
+              <td class="p-3 font-sans font-bold text-pink-400">Relay 2: Lights</td>
+              <td class="p-3">IN Trigger</td>
+              <td class="p-3">MegaPi Analog</td>
+              <td class="p-3 text-pink-300 font-bold">Pin A4</td>
+              <td class="p-3 text-pink-400 font-bold">5V Digital Out</td>
+              <td class="p-3 font-sans text-slate-400"><code>const int pinReleLuces = A4;</code></td>
+            </tr>
+            <tr class="hover:bg-slate-800/40">
+              <td class="p-3 font-sans font-bold text-pink-400">Relay 3: Cooling Fan</td>
+              <td class="p-3">IN Trigger</td>
+              <td class="p-3">MegaPi Digital</td>
+              <td class="p-3 text-pink-300 font-bold">Pin 35</td>
+              <td class="p-3 text-pink-400 font-bold">5V Digital Out</td>
+              <td class="p-3 font-sans text-slate-400"><code>const int pinReleVentilador = 35;</code></td>
+            </tr>
+            <!-- ADS1115 ADC -->
+            <tr class="hover:bg-slate-800/40">
+              <td class="p-3 font-sans font-bold text-cyan-400">ADS1115 16-bit ADC</td>
+              <td class="p-3">SDA, SCL, AIN0</td>
+              <td class="p-3">MegaPi I2C & Divider</td>
+              <td class="p-3 text-cyan-300 font-bold">D20, D21, R1=100k, R2=50k</td>
+              <td class="p-3 text-sky-400 font-bold">I2C (0x48 Mapped)</td>
+              <td class="p-3 font-sans text-slate-400"><code>FACTOR_DIVISOR = (100k+50k)/50k = 3.0;</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Pan and Zoom Controller
+    let scale = 1;
+    let pointX = 0;
+    let pointY = 0;
+    let isPanning = false;
+    let startX = 0;
+    let startY = 0;
+
+    const container = document.getElementById('svgContainer');
+    const zoomLayer = document.getElementById('zoomLayer');
+    const zoomDisplay = document.getElementById('zoomLevelDisplay');
+
+    function updateTransform() {
+      zoomLayer.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`;
+      zoomDisplay.textContent = `${Math.round(scale * 100)}%`;
+    }
+
+    container.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      startX = e.clientX - pointX;
+      startY = e.clientY - pointY;
+      isPanning = true;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isPanning) return;
+      pointX = e.clientX - startX;
+      pointY = e.clientY - startY;
+      updateTransform();
+    });
+
+    window.addEventListener('mouseup', () => { isPanning = false; });
+
+    container.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const xs = (e.clientX - container.getBoundingClientRect().left - pointX) / scale;
+      const ys = (e.clientY - container.getBoundingClientRect().top - pointY) / scale;
+      const delta = -e.deltaY;
+      if (delta > 0) {
+        scale = Math.min(scale * 1.15, 4.0);
+      } else {
+        scale = Math.max(scale / 1.15, 0.4);
+      }
+      pointX = (e.clientX - container.getBoundingClientRect().left) - xs * scale;
+      pointY = (e.clientY - container.getBoundingClientRect().top) - ys * scale;
+      updateTransform();
+    });
+
+    document.getElementById('zoomInBtn').addEventListener('click', () => {
+      scale = Math.min(scale * 1.25, 4.0);
+      updateTransform();
+    });
+
+    document.getElementById('zoomOutBtn').addEventListener('click', () => {
+      scale = Math.max(scale / 1.25, 0.4);
+      updateTransform();
+    });
+
+    document.getElementById('resetZoomBtn').addEventListener('click', () => {
+      scale = 1;
+      pointX = 0;
+      pointY = 0;
+      updateTransform();
+    });
+
+    // Download SVG handler
+    document.getElementById('downloadSvgBtn').addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = 'circuit_diagram_orbit_wro.svg';
+      a.download = 'circuit_diagram_orbit_wro.svg';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+
+    // Subsystem Wire Highlight Filters
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterButtons.forEach(b => {
+          b.classList.remove('bg-blue-600', 'text-white');
+          b.classList.add('bg-slate-800');
+        });
+        btn.classList.add('bg-blue-600', 'text-white');
+        btn.classList.remove('bg-slate-800');
+
+        const filter = btn.getAttribute('data-filter');
+        const svgObj = document.getElementById('svgObject');
+        const svgDoc = svgObj.contentDocument;
+        if (!svgDoc) return;
+
+        const allWires = svgDoc.querySelectorAll('[class^="wire-"]');
+        allWires.forEach(w => {
+          if (filter === 'all') {
+            w.classList.remove('wire-dimmed', 'wire-active');
+          } else {
+            const matches = w.classList.contains(`wire-${filter}`) || 
+              (filter === 'power-12v' && w.classList.contains('wire-power-12v')) ||
+              (filter === 'power-5v' && w.classList.contains('wire-5v')) ||
+              (filter === 'i2c' && (w.classList.contains('wire-i2c-sda') || w.classList.contains('wire-i2c-scl')));
+            if (matches) {
+              w.classList.remove('wire-dimmed');
+              w.classList.add('wire-active');
+            } else {
+              w.classList.add('wire-dimmed');
+              w.classList.remove('wire-active');
+            }
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
